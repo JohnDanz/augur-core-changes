@@ -128,8 +128,6 @@ The `currencies[<index>](rate, rateContract, contract)` array was added and is a
 ### branches method changes, additions, and removals:
 *note: when a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
 ```
-- initDefaultBranch():
-
 ! setInitialBalance(branch, period, balance):
 ```
 Changed:
@@ -242,6 +240,8 @@ A few things have changed with `initializeBranch`, `minTradingFee` has become th
 `setMostRecentChild` was added to set the `mostRecentChild` value for a branch. It takes in `parent` and `child`, `parent` is the branch that will be the `parent`, `child` is the value set to `mostRecentChild` for that `parent` branch.
 
 ```
+- initDefaultBranch():
+
 - getMarketsInBranch(branch):
 
 - getSomeMarketsInBranch(branch, initial, last):
