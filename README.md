@@ -78,7 +78,7 @@ Key : description
 ```
 *Any function not explicitly mentioned is unchanged from it's current master iteration.*
 
-#### Data Structure of backstops Contract:
+### Data Structure of backstops Contract:
 ```
 data roundTwo[<eventId>](roundTwo, originalVotePeriod, originalOutcome,
 originalEthicality, final, bondPoster, bondReturned, bondPaid,
@@ -91,7 +91,7 @@ data resolved[<branch>][<forkPeriod>]
 
 The roundTwo array now contains a new value, `disputedOverEthics`.   `disputedOverEthics` is a boolean indicating if the `event` was disputed over it's ethicality.
 
-#### backstops method changes, additions, and removals:
+### backstops method changes, additions, and removals:
 ```
 + getDisputedOverEthics(event):
 ```
@@ -112,7 +112,7 @@ Key : description
 ```
 *Any function not explicitly mentioned is unchanged from it's current master iteration.*
 
-#### Data Structure of branches Contract:
+### Data Structure of branches Contract:
 ```
 data Branches[<branch>](currentVotePeriod, periodLength, markets[<index>],
 numMarkets, fxpMinTradingFee, balance[<period>][<currency>], creationDate, oracleOnly, parentPeriod, baseReporters, forkPeriod, eventForkedOver, parent, contract[<currency>], numCurrencies, currencies[<index>](rate, rateContract, contract), currencyToIndex[<currency>], mostRecentChild, currencyActive[<currency>], forkTime)
@@ -124,7 +124,7 @@ With the update to the contracts planned in develop, we are switching to using "
 
 The `currencies[<index>](rate, rateContract, contract)` array was added and is a simple 0 indexed list. Inside each index you will find 3 values, the `contract` which is the `currency` address, the `rate` which is a fixed exchange rate and the `rateContract` which is a contract with rates for the currency to be exchanged with `Eth` denominated in `Wei`. `currencyToIndex[<currency>]` is a reverse mapping of currencies to their indices. `mostRecentChild` is the most recent child of a `branch`, `currencyActive[<currency>]` contains booleans indicating wether a currency is allowed to be used to create a new market or event. `forkTime` was also added as a timestamp for when the `branch` was forked.
 
-#### branches method changes, additions, and removals:
+### branches method changes, additions, and removals:
 *note: when a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
 ```
 - initDefaultBranch():
