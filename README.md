@@ -78,22 +78,28 @@ Key : description
 ```
 Any function not explicitly mentioned is unchanged from it's current master iteration.
 
-#### DataStructure of Contract:
+#### Data Structure of backstops Contract:
 ```
-data roundTwo[](roundTwo, originalVotePeriod, originalOutcome, originalEthicality, final, bondPoster, bondReturned, bondPaid, refund,  
-*disputedOverEthics*)
-  disputedOverEthics was added, it's a boolean.
+data roundTwo[<eventId>](roundTwo, originalVotePeriod, originalOutcome,
+originalEthicality, final, bondPoster, bondReturned, bondPaid,
+refund, disputedOverEthics)
 
-data forking[](bondPoster, bondAmount, forkedOverEthicality, bondPaid, originalBranch, moved)
+data forking[<eventId>](bondPoster, bondAmount, forkedOverEthicality, bondPaid, originalBranch, moved)
 
-data resolved[][]
+data resolved[<branch>][<forkPeriod>]
 ```
+
+The roundTwo array now contains a new value, `disputedOverEthics`.   `disputedOverEthics` is a boolean indicating if the `event` was disputed over it's ethicality.
+
+#### method changes and additions:
 ```
 + getDisputedOverEthics(event):
-    returns the disputedOverEthics bool for event
-+ setDisputedOverEthics(event):
-    sets the passed in event's disputedOverEthics bool to 1
 ```
+getDisputedOverEthics returns the disputedOverEthics bool for an event
+```
++ setDisputedOverEthics(event):
+```
+setDisputedOverEthics sets the passed in event's disputedOverEthics bool to 1
 
 ## src/data_api/branches.se
 ```
@@ -105,6 +111,17 @@ Key : description
 <-  : function moved TO another contract
 ```
 Any function not explicitly mentioned is unchanged from it's current master iteration.
+#### Data Structure of branches Contract:
+```
+data Branches[<branch>](currentVotePeriod, periodLength, markets[<index>],
+numMarkets, fxpMinTradingFee, balance[<period>][<currency>], creationDate, oracleOnly, parentPeriod, baseReporters, forkPeriod, eventForkedOver, parent, contract[<currency>], numCurrencies, currencies[<index>](rate, rateContract, contract), currencyToIndex[<currency>], mostRecentChild, currencyActive[<currency>], forkTime)
+
+data branchList[<index>]
+data branchListCount
+```
+With the update to the contracts planned in develop, we are switching to using "currency". When you see `currency` in the contracts that value is an address for the token allowed to be used on this branch. The balance array has changed to become multi-dimensional and now takes in both a period and the currency to work with balance since we have a new concept of multiple currencies allowed. So it's not enough to just ask for the balance in a period, you need to know what denomination of currency we want to get the balance of as an example. `minTradingFee` has become `fxpMinTradingFee`, which indicates that this value should be in fix point. The `contract[<currency>]` array was added and holds the `wallet` addresses for the indexed `currency` address. `numCurrencies` is a simple count of the number of currencies currently allowed on the `branch`.
+
+The `currencies[<index>](rate, rateContract, contract)` array was added and is a simple 0 indexed list. Inside each index you will find 3 values, the `contract` which is the `currency` address, the `rate` which is a fixed exchange rate and the `rateContract` which is a contract with rates for the currency to be exchanged with `Eth` denominated in `Wei`. `currencyToIndex[<currency>]` is a reverse mapping of currencies to their indices. `mostRecentChild` is the most recent child of a `branch`, `currencyActive[<currency>]` contains booleans indicating wether a currency is allowed to be used to create a new market or event. `forkTime` was also added as a timestamp for when the `branch` was forked.
 
 - initDefaultBranch():
 ! setInitialBalance(branch, period, balance):
