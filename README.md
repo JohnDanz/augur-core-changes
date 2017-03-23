@@ -1,10 +1,12 @@
 # file structure in augur-core/develop
+```
 Key : description
 +   : added file that didn't exist in master
 -   : removed file that used to exist in master
 ->  : existing file that was moved to a new location
 <-  : a file that was removed from this location and has been moved
 *   : a file that is exists in this location for both master and develop
+```
 ```
 src/
   * repContract.se
