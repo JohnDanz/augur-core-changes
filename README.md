@@ -351,5 +351,47 @@ Much like the above getter method was changed to require a `currency`, the same 
 ```
 `setRepCollected` was added as a way to indicate that `REP` has been collected for a specific `address` and a selected `branch` and `period`.
 
+## src/data_api/events.se
+
+### Data Structure of events Contract:
+```
+data Events[<event>](
+  branch,
+  expirationDate,
+  outcome,
+  fxpMinValue,
+  fxpMaxValue,
+  numOutcomes,
+  markets[<index>],
+  numMarkets,
+  threshold,
+  mode,
+  uncaughtOutcome,
+  ethical,
+  originalExp,
+  rejected,
+  rejectedPeriod,
+  bond,
+  forked,
+  forkOver,
+  forkOutcome,
+  forkEthicality,
+  resolutionSource[<index>],
+  resolutionSourceLength,
+  pushedUp,
+  reportersPaidSoFarForEvent,
+  resolutionAddress,
+  extraBond,
+  firstPreliminaryOutcome,
+  challenged,
+  resolveBondPoster,
+  earlyResolutionBond,
+  creationTime
+)
+
+data past24Hours[<period>]
+```
+Changes in the event contract's data structure include the change from `minValue, maxValue` to `fxpMinValue, fxpMaxValue` to further indicate that the minimum value and maximum value should be fixed point. `reportersPaidSoFarForEvent` contains the number of reporters who have been paid so far for a particular event. `resolutionAddress` is the address used to resolve an event first. `extraBond` contains the bond amount used to challenge the initial resolution. `firstPreliminaryOutcome` contains the outcome reported by the `resolutionAddress`. `challenged` contains a boolean of whether the event has been challenged already or not. `resolveBondPoster` is the address that posted the `REP` bond for the first resolution period. `earlyResolutionBond` contains the bond amount paid for an early resolution of a specified event. Finally `creationTime` was added to hold the timestamp of when a specified event was created.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
