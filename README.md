@@ -1,11 +1,12 @@
 # file structure in augur-core/develop
 ```
 Key : description
+*   : a file that is exists in this location for both master and develop
 +   : added file that didn't exist in master
 -   : removed file that used to exist in master
 ->  : existing file that was moved to a new location
-<-  : a file that was removed from this location and has been moved
-*   : a file that is exists in this location for both master and develop
+<-  : a file that was removed from this location and still exists
+      but has been moved
 ```
 ```
 src/
@@ -69,15 +70,6 @@ src/functions/
 ```
 
 ## src/data_api/backstops.se
-```
-Key : description
-!   : Modified function
--   : removed function
-+   : added function
-->  : function moved FROM another contract
-<-  : function moved TO another contract
-```
-*Any function not explicitly mentioned is unchanged from it's current master iteration.*
 
 ### Data Structure of backstops Contract:
 ```
@@ -94,6 +86,13 @@ The roundTwo array now contains a new value, `disputedOverEthics`.   `disputedOv
 
 ### backstops method changes, additions, and removals:
 ```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration.*
+```
 + getDisputedOverEthics(event):
 ```
 `getDisputedOverEthics` returns the `disputedOverEthics` bool for an event
@@ -103,15 +102,6 @@ The roundTwo array now contains a new value, `disputedOverEthics`.   `disputedOv
 `setDisputedOverEthics` sets the passed in event's `disputedOverEthics` bool to 1
 
 ## src/data_api/branches.se
-```
-Key : description
-!   : Modified function
--   : removed function
-+   : added function
-->  : function moved FROM another contract
-<-  : function moved TO another contract
-```
-*Any function not explicitly mentioned is unchanged from it's current master iteration.*
 
 ### Data Structure of branches Contract:
 ```
@@ -126,7 +116,14 @@ With the update to the contracts planned in develop, we are switching to using "
 The `currencies[<index>](rate, rateContract, contract)` array was added and is a simple 0 indexed list. Inside each index you will find 3 values, the `contract` which is the `currency` address, the `rate` which is a fixed point exchange rate and the `rateContract` which is a contract with rates for the currency to be exchanged with `Eth` denominated in `Wei`. The `rate` will take precendence over the `rateContract` and only one is required per `currency`. `currencyToIndex[<currency>]` is a reverse mapping of currencies to their indices. `mostRecentChild` is the most recent child of a `branch`, `currencyActive[<currency>]` contains booleans indicating wether a currency is allowed to be used to create a new market or event. `forkTime` was also added as a timestamp for when the `branch` was forked.
 
 ### branches method changes, additions, and removals:
-*note: when a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
 ```
 ! setInitialBalance(branch, period, balance):
 ```
@@ -246,6 +243,28 @@ A few things have changed with `initializeBranch`, `minTradingFee` has become th
 
 - getSomeMarketsInBranch(branch, initial, last):
 ```
+
+## src/data_api/consensusData.se
+
+### Data Structure of consensusData Contract:
+```
+data branch[<branch>](period<period>](denominator, penalized[<address>](event[<event>], num, notEnoughReportsPenalized), feesCollected[<currency>][<address>], repCollected[<address>], feeFirst, periodBalance), penalizedUpTo[<address>], baseReportersLastPeriod)
+
+data refunds[<address/event>]
+
+data slashed[<branch>][<votePeriod>](reporter[<address>])
+```
+There are only a few changes to the Data Structure of the consensusData contract. One of those changes is `feesCollected[<currency>][<address>]` has become multi-dimensional, it now takes the `currency` as the first index, and an account `address` as the second. This is to facilitate the new use of currencies throughout the augur contracts. Naturally if you want to know about `feesCollected` you will now need to have the user `address` and also the `currency` type to determine what denomination of fees we are looking for. The other addition is `repCollected[<address>]`. `repCollected` has been added to indicate wether the `address` has collected `REP` or not.
+
+### consensusData method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
 
 
 # Ignore the below please.
