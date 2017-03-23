@@ -68,16 +68,18 @@ src/functions/
 ```
 
 ## src/data_api/backstops.se
+```
 Key : description
 !   : Modified function
 -   : removed function
 +   : added function
 ->  : function moved FROM another contract
 <-  : function moved TO another contract
-
+```
 Any function not explicitly mentioned is unchanged from it's current master iteration.
 
 #### DataStructure of Contract:
+```
 data roundTwo[](roundTwo, originalVotePeriod, originalOutcome, originalEthicality, final, bondPoster, bondReturned, bondPaid, refund,  
 *disputedOverEthics*)
   disputedOverEthics was added, it's a boolean.
@@ -85,20 +87,23 @@ data roundTwo[](roundTwo, originalVotePeriod, originalOutcome, originalEthicalit
 data forking[](bondPoster, bondAmount, forkedOverEthicality, bondPaid, originalBranch, moved)
 
 data resolved[][]
-
+```
+```
 + getDisputedOverEthics(event):
     returns the disputedOverEthics bool for event
 + setDisputedOverEthics(event):
     sets the passed in event's disputedOverEthics bool to 1
+```
 
 ## src/data_api/branches.se
+```
 Key : description
 !   : Modified function
 -   : removed function
 +   : added function
 ->  : function moved FROM another contract
 <-  : function moved TO another contract
-
+```
 Any function not explicitly mentioned is unchanged from it's current master iteration.
 
 - initDefaultBranch():
