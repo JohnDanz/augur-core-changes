@@ -38,6 +38,7 @@ src/functions/
   * closeMarket.se
   * collectFees.se
   * completeSets.se
+  <- compositeGetters.se
   * consensus.se
   * createBranch.se
   * createMarket.se
@@ -122,7 +123,7 @@ data branchListCount
 ```
 With the update to the contracts planned in develop, we are switching to using "currency". When you see `currency` in the contracts that value is an address for the token allowed to be used on this branch. The balance array has changed to become multi-dimensional and now takes in both a period and the currency to work with balance since we have a new concept of multiple currencies allowed. So it's not enough to just ask for the balance in a period, you need to know what denomination of currency we want to get the balance of as an example. `minTradingFee` has become `fxpMinTradingFee`, which indicates that this value should be in fix point. The `contract[<currency>]` array was added and holds the `wallet` addresses for the indexed `currency` address. `numCurrencies` is a simple count of the number of currencies currently allowed on the `branch`.
 
-The `currencies[<index>](rate, rateContract, contract)` array was added and is a simple 0 indexed list. Inside each index you will find 3 values, the `contract` which is the `currency` address, the `rate` which is a fixed exchange rate and the `rateContract` which is a contract with rates for the currency to be exchanged with `Eth` denominated in `Wei`. `currencyToIndex[<currency>]` is a reverse mapping of currencies to their indices. `mostRecentChild` is the most recent child of a `branch`, `currencyActive[<currency>]` contains booleans indicating wether a currency is allowed to be used to create a new market or event. `forkTime` was also added as a timestamp for when the `branch` was forked.
+The `currencies[<index>](rate, rateContract, contract)` array was added and is a simple 0 indexed list. Inside each index you will find 3 values, the `contract` which is the `currency` address, the `rate` which is a fixed point exchange rate and the `rateContract` which is a contract with rates for the currency to be exchanged with `Eth` denominated in `Wei`. The `rate` will take precendence over the `rateContract` and only one is required per `currency`. `currencyToIndex[<currency>]` is a reverse mapping of currencies to their indices. `mostRecentChild` is the most recent child of a `branch`, `currencyActive[<currency>]` contains booleans indicating wether a currency is allowed to be used to create a new market or event. `forkTime` was also added as a timestamp for when the `branch` was forked.
 
 ### branches method changes, additions, and removals:
 *note: when a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
@@ -143,10 +144,6 @@ Changed:
 `getInitialBalance(branch, period, currency)`
 `getInitialBalance` also now takes `currency` in order to determine which currency you want to get the initial balance of.
 ```
-- getMarketsInBranch(branch):
-
-- getSomeMarketsInBranch(branch, initial, last):
-
 ! initializeBranch(ID, currentVotePeriod, periodLength, minTradingFee, oracleOnly, parentPeriod, parent):
 ```
 Changed:
@@ -179,20 +176,77 @@ A few things have changed with `initializeBranch`, `minTradingFee` has become th
 ```
 `reactivateCurrency` is much like the above `disableCurrency` except that it enables the `currency` specified to be used to create a new `market` or `event` on the `branch`.
 
+```
++ replaceCurrency(branch, oldCurrencyIndex, newCurrency, newRate, newRateContract):
+```
+`replaceCurrency` was added to to replace a currently setup `currency` with a updated one. Takes a `branch` and the index `oldCurrencyIndex` of the `currency` we plan to replace. We give a the updated `currency` address as `newCurrency` and we can also pass a new `rate` `newRate` or a new `rateContract` `newRateContract`.
+
+```
++ removeLastCurrency(branch):
+```
+`removeLastCurrency` is used to remove the most recently added `currency` from a specified `branch`.
+
+```
++ updateCurrencyRate(branch, currency, rate, rateContract):
+```
+`updateCurrencyRate` was added to update the `rate` or `rateContract` for a specified `currency`.
+
+```
++ getCurrencyRate(branch, currency):
+```
+`getCurrencyRate` returns the exchange rate for a specified `currency` to `Eth` denominated in `Wei`. This will use the `rate` first, if `rate` isn't defined for the specified `currency` then it will fall back to the `rateContract`.
+
+```
++ getCurrency(branch, index):
+```
+`getCurrency` was added to return a currency's address given a currency's `index` for a specified `branch`.
+
+```
++ getCurrencyByContract(branch, currency):
+```
+`getCurrencyByContract` returns the currency's index given a currency's address `currency` and a `branch`.
+
+```
++ getWallet(branch, currency):
+```
+`getWallet` returns the `wallet` holding the specified `currency` on a certain `branch`.
+
+```
++ getNumCurrencies(branch):
+```
+`getNumCurrencies` returns the number of currencies on a specific `branch`.
+
+```
++ getCurrencyActive(branch, currency):
+```
+`getCurrencyActive` returns wether the specified `currency` is active and therefor usable in new markets/events created on the defined `branch`.
+
+```
++ getMarketIDsInBranch(branch, initial, last):
+```
+`getMarketIDsInBranch` returns an array of marketIDs in a specified `branch`, from the `initial` index to the `last` index. This appears to have replaced the function `getSomeMarketsInBranch` which has been removed.
+
+```
++ getBranchesStartingAt(index)
+```
+`getBranchesStartingAt` returns the all the branches since the specified `index` including the branch at that index.
+
+```
++ getMostRecentChild(ID):
+```
+`getMostRecentChild` returns the most recent child of a specified branch `ID`.
+
+```
++ setMostRecentChild(parent, child):
+```
+`setMostRecentChild` was added to set the `mostRecentChild` value for a branch. It takes in `parent` and `child`, `parent` is the branch that will be the `parent`, `child` is the value set to `mostRecentChild` for that `parent` branch.
+
+```
+- getMarketsInBranch(branch):
+
+- getSomeMarketsInBranch(branch, initial, last):
+```
 
 
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
-replaceCurrency(branch, oldCurrencyIndex, newCurrency, newRate, newRateContract):
-removeLastCurrency(branch):
-updateCurrencyRate(branch, currency, rate, rateContract):
-getCurrencyRate(branch, currency):
-getCurrency(branch, index):
-getCurrencyByContract(branch, currency):
-getWallet(branch, currency):
-getNumCurrencies(branch):
-getCurrencyActive(branch, currency):
-getMarketIDsInBranch(branch, initial, last):
-getBranchesStartingAt(index):
-getMostRecentChild(ID):
-setMostRecentChild(parent, child):
