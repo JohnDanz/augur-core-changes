@@ -131,7 +131,7 @@ The `currencies[<index>](rate, rateContract, contract)` array was added and is a
 
 ! setInitialBalance(branch, period, balance):
 ```
-`setInitialBalance` Changed:
+Changed:
 `setInitialBalance(branch, period, balance, currency)`
 `setInitialBalance` now also takes in `currency` as well in order to indicate
 which currency we are setting the balance of.
@@ -139,8 +139,8 @@ which currency we are setting the balance of.
 ```
 ! getInitialBalance(branch, period):
 ```
-`getInitialBalance` Changed:
-```getInitialBalance(branch, period, currency)```
+Changed:
+`getInitialBalance(branch, period, currency)`
 `getInitialBalance` also now takes `currency` in order to determine which currency you want to get the initial balance of.
 ```
 - getMarketsInBranch(branch):
@@ -149,24 +149,41 @@ which currency we are setting the balance of.
 
 ! initializeBranch(ID, currentVotePeriod, periodLength, minTradingFee, oracleOnly, parentPeriod, parent):
 ```
-`initializeBranch` Changed:
+Changed:
 `initializeBranch(ID, currentVotePeriod, periodLength, fxpMinTradingFee,
  oracleOnly, parentPeriod, parent, contract, wallet, mostRecentChild):`
 A few things have changed with `initializeBranch`, `minTradingFee` has become the more explicit `fxpMinTradingFee` and should be passed as a fixed point value. `contract` was added and is expecting a `currency` address as it's value, `wallet` was added and is expected to be the `wallet` address used to hold the `currency` passed as `contract`. `mostRecentChild` is the most recent child of the `branch`.
 
 ```
-+ getForkTime(branch)
++ getForkTime(branch):
 ```
 `getForkTime` was added to return the fork timestamp which is set when `setForkPeriod` is called. If the branch hasn't been forked then this will return 0.
 
+```
++ updateNumCurrencies(branch, num):
+```
+`updateNumCurrencies` was added to update the number of currencies on the `branch`.
 
-*Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
+```
++ addCurrency(branch, currency, rate, rateContract):
+```
+`addCurrency` was added to add an new `currency` to the `branch`. You only need to pass either `rate` or `rateContract`. As mentioned above, `rate` is a fixed point exchange rate for the currency to `Eth` denominated in `Wei`. A `rateContract` is a contract that contains rates for conversion `currency` to `Eth` denominated in `Wei`.
+
+```
++ disableCurrency(branch, currency):
+```
+`disableCurrency` was added to disable a `currency` on a specified `branch` from being used to create a `market` or `event` on that `branch`.
+
+```
++ reactivateCurrency(branch, currency):
+```
+`reactivateCurrency` is much like the above `disableCurrency` except that it enables the `currency` specified to be used to create a new `market` or `event` on the `branch`.
+
+
+
 # Ignore the below please.
-updateNumCurrencies(branch, num):
-addCurrency(branch, currency, rate, rateContract):
-disableCurrency(branch, currency):
-reactivateCurrency(branch, currency)
-replaceCurrency(branch, oldCurrencyIndex, newCurrency, newRate,
+*Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
+replaceCurrency(branch, oldCurrencyIndex, newCurrency, newRate, newRateContract):
 removeLastCurrency(branch):
 updateCurrencyRate(branch, currency, rate, rateContract):
 getCurrencyRate(branch, currency):
@@ -175,11 +192,7 @@ getCurrencyByContract(branch, currency):
 getWallet(branch, currency):
 getNumCurrencies(branch):
 getCurrencyActive(branch, currency):
-setInitialBalance(branch, period, balance, currency):
-getInitialBalance(branch, period, currency):
 getMarketIDsInBranch(branch, initial, last):
 getBranchesStartingAt(index):
 getMostRecentChild(ID):
 setMostRecentChild(parent, child):
-initializeBranch(ID, currentVotePeriod, periodLength, fxpMinTradingFee, oracleOnly, parentPeriod, parent, contract, wallet, mostRecentChild):
-getForkTime(branch):
