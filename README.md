@@ -73,11 +73,27 @@ src/functions/
 
 ### Data Structure of backstops Contract:
 ```
-data roundTwo[<eventId>](roundTwo, originalVotePeriod, originalOutcome,
-originalEthicality, final, bondPoster, bondReturned, bondPaid,
-refund, disputedOverEthics)
+data roundTwo[<eventId>](
+  roundTwo,
+  originalVotePeriod,
+  originalOutcome,
+  originalEthicality,
+  final,
+  bondPoster,
+  bondReturned,
+  bondPaid,
+  refund,
+  disputedOverEthics
+)
 
-data forking[<eventId>](bondPoster, bondAmount, forkedOverEthicality, bondPaid, originalBranch, moved)
+data forking[<eventId>](
+  bondPoster,
+  bondAmount,
+  forkedOverEthicality,
+  bondPaid,
+  originalBranch,
+  moved
+)
 
 data resolved[<branch>][<forkPeriod>]
 ```
@@ -105,8 +121,32 @@ Key : description
 
 ### Data Structure of branches Contract:
 ```
-data Branches[<branch>](currentVotePeriod, periodLength, markets[<index>],
-numMarkets, fxpMinTradingFee, balance[<period>][<currency>], creationDate, oracleOnly, parentPeriod, baseReporters, forkPeriod, eventForkedOver, parent, contract[<currency>], numCurrencies, currencies[<index>](rate, rateContract, contract), currencyToIndex[<currency>], mostRecentChild, currencyActive[<currency>], forkTime)
+data Branches[<branch>](
+  currentVotePeriod,
+  periodLength,
+  markets[<index>],
+  numMarkets,
+  fxpMinTradingFee,
+  balance[<period>][<currency>],
+  creationDate,
+  oracleOnly,
+  parentPeriod,
+  baseReporters,
+  forkPeriod,
+  eventForkedOver,
+  parent,
+  contract[<currency>],
+  numCurrencies,
+  currencies[<index>](
+    rate,
+    rateContract,
+    contract
+  ),
+  currencyToIndex[<currency>],
+  mostRecentChild,
+  currencyActive[<currency>],
+  forkTime
+)
 
 data branchList[<index>]
 data branchListCount
@@ -248,11 +288,28 @@ A few things have changed with `initializeBranch`, `minTradingFee` has become th
 
 ### Data Structure of consensusData Contract:
 ```
-data branch[<branch>](period<period>](denominator, penalized[<address>](event[<event>], num, notEnoughReportsPenalized), feesCollected[<currency>][<address>], repCollected[<address>], feeFirst, periodBalance), penalizedUpTo[<address>], baseReportersLastPeriod)
+data branch[<branch>](
+  period[<period>](
+    denominator,
+    penalized[<address>](
+      event[<event>],
+      num,
+      notEnoughReportsPenalized
+    ),
+    feesCollected[<currency>][<address>],
+    repCollected[<address>],
+    feeFirst,
+    periodBalance
+  ),
+  penalizedUpTo[<address>],
+  baseReportersLastPeriod
+)
 
 data refunds[<address/event>]
 
-data slashed[<branch>][<votePeriod>](reporter[<address>])
+data slashed[<branch>][<votePeriod>](
+  reporter[<address>]
+)
 ```
 There are only a few changes to the Data Structure of the consensusData contract. One of those changes is `feesCollected[<currency>][<address>]` has become multi-dimensional, it now takes the `currency` as the first index, and an account `address` as the second. This is to facilitate the new use of currencies throughout the augur contracts. Naturally if you want to know about `feesCollected` you will now need to have the user `address` and also the `currency` type to determine what denomination of fees we are looking for. The other addition is `repCollected[<address>]`. `repCollected` has been added to indicate wether the `address` has collected `REP` or not.
 
@@ -265,7 +322,34 @@ Key : description
 ```
 *Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
 
+```
+! getFeesCollected(branch, address, period):
+```
+Changed:
+`getFeesCollected(branch, address, period, currency):`
+In order to determine wether the fees have been collected for a specific `address` on a the indicated `branch` and during the selected `period`, you now need to specify which `currency` you are attempting to check. This has been added because of the addition of `currency` throughout Augur.
 
+```
+! setFeesCollected(branch, address, period):
+```
+Changed:
+`setFeesCollected(branch, address, period, currency):`
+Much like the above getter method was changed to require a `currency`, the same is true for the setter. Now we must pass in the `currency` you wish to set as collected for the specified `address`, given a `branch` and `period`.
+
+```
++ decreaseDenominator(branch, period, amount):
+```
+`decreaseDenominator` lowers the denominator used in calculating fees by a specified `amount` for a specific `branch` and `period`.
+
+```
++ getRepCollected(branch, address, period):
+```
+`getRepCollected` was added to indicate wether a specific `address` has had it's `REP` collected for a selected `branch` and `period`.
+
+```
++ setRepCollected(branch, address, period):
+```
+`setRepCollected` was added as a way to indicate that `REP` has been collected for a specific `address` and a selected `branch` and `period`.
 
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
