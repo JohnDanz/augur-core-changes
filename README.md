@@ -95,11 +95,11 @@ The roundTwo array now contains a new value, `disputedOverEthics`.   `disputedOv
 ```
 + getDisputedOverEthics(event):
 ```
-getDisputedOverEthics returns the disputedOverEthics bool for an event
+`getDisputedOverEthics` returns the `disputedOverEthics` bool for an event
 ```
 + setDisputedOverEthics(event):
 ```
-setDisputedOverEthics sets the passed in event's disputedOverEthics bool to 1
+`setDisputedOverEthics` sets the passed in event's `disputedOverEthics` bool to 1
 
 ## src/data_api/branches.se
 ```
@@ -131,7 +131,7 @@ The `currencies[<index>](rate, rateContract, contract)` array was added and is a
 
 ! setInitialBalance(branch, period, balance):
 ```
-setInitialBalance Changed:
+`setInitialBalance` Changed:
 `setInitialBalance(branch, period, balance, currency)`
 `setInitialBalance` now also takes in `currency` as well in order to indicate
 which currency we are setting the balance of.
@@ -139,8 +139,8 @@ which currency we are setting the balance of.
 ```
 ! getInitialBalance(branch, period):
 ```
-getInitialBalance Changed:
-`getInitialBalance(branch, period, currency)`
+`getInitialBalance` Changed:
+```getInitialBalance(branch, period, currency)```
 `getInitialBalance` also now takes `currency` in order to determine which currency you want to get the initial balance of.
 ```
 - getMarketsInBranch(branch):
@@ -149,7 +149,7 @@ getInitialBalance Changed:
 
 ! initializeBranch(ID, currentVotePeriod, periodLength, minTradingFee, oracleOnly, parentPeriod, parent):
 ```
-initializeBranch Changed:
+`initializeBranch` Changed:
 `initializeBranch(ID, currentVotePeriod, periodLength, fxpMinTradingFee,
  oracleOnly, parentPeriod, parent, contract, wallet, mostRecentChild):`
 A few things have changed with `initializeBranch`, `minTradingFee` has become the more explicit `fxpMinTradingFee` and should be passed as a fixed point value. `contract` was added and is expecting a `currency` address as it's value, `wallet` was added and is expected to be the `wallet` address used to hold the `currency` passed as `contract`. `mostRecentChild` is the most recent child of the `branch`.
