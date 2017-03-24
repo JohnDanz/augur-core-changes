@@ -393,5 +393,103 @@ data past24Hours[<period>]
 ```
 Changes in the event contract's data structure include the change from `minValue, maxValue` to `fxpMinValue, fxpMaxValue` to further indicate that the minimum value and maximum value should be fixed point. `reportersPaidSoFarForEvent` contains the number of reporters who have been paid so far for a particular event. `resolutionAddress` is the address used to resolve an event first. `extraBond` contains the bond amount used to challenge the initial resolution. `firstPreliminaryOutcome` contains the outcome reported by the `resolutionAddress`. `challenged` contains a boolean of whether the event has been challenged already or not. `resolveBondPoster` is the address that posted the `REP` bond for the first resolution period. `earlyResolutionBond` contains the bond amount paid for an early resolution of a specified event. Finally `creationTime` was added to hold the timestamp of when a specified event was created.
 
+### events method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+```
+! initializeEvent(ID, branch, expirationDate, minValue, maxValue, numOutcomes, resolution: str):
+```
+Changed:
+`initializeEvent(ID, branch, expirationDate, fxpMinValue, fxpMaxValue, numOutcomes, resolution: str, resolutionAddress, resolveBondPoster):`
+The changes here come from the switch from plain `minValue` and `maxValue` to `fxpMinValue` and `fxpMaxValue` respectively. You also have two new fields expected, `resolutionAddress` which is optionally an address you want to have report to resolve the market. This is done if you want to have only 1 source for reporting, if this is not defined then this event will default to regular reporting. `resolveBondPoster` is the address of a person who posted the resolution bond, generally this will be the person who created the event.
+
+```
++ getCreationTime(event):
+```
+`getCreationTime` was added to get the timestamp of when the specified `event` was created.
+
+```
++ setCreationTime(event):
+```
+`setCreationTime` was added to set the timestamp of when the specified `event` is created.
+
+```
++ getResolveBondPoster(event):
+```
+`getResolveBondPoster` has been added to return the address of the account who posted the resolution bond for a specific `event`.
+
+```
++ getChallenged(event):
+```
+`getChallenged` returns wether the specified `event` has been challenged or not.
+
+```
++ setChallenged(event):
+```
+`setChallenged` sets the specific `event` to challenged.
+
+```
++ getFirstPreliminaryOutcome(event):
+```
+`getFirstPreliminaryOutcome` returns the outcome submitted by the `resolutionAddress`, which is stored as firstPreliminaryOutcome, for a specific `event`.
+
+```
++ setFirstPreliminaryOutcome(event, outcome):
+```
+`setFirstPreliminaryOutcome` was added to set the `firstPreliminaryOutcome` which is the `outcome` submitted by the `resolutionAddress`. It takes in a specified `event` and the `outcome` we intend to set.
+
+```
++ getReportersPaidSoFar(event):
+```
+`getReportersPaidSoFar` was added to return the count of the number of people who have reported so far on the specified `event`.
+
+```
++ addReportersPaidSoFar(event):
+```
+`addReportersPaidSoFar` has been added to increment the count of the reporters paid so far for a specified `event`.
+
+```
++ getResolutionAddress(event):
+```
+`getResolutionAddress` was added to return the `resolutionAddress` if one exists for a specified `event`.
+
+```
++ getEventResolution(event):
+```
+`getEventResolution` was created to return the resolution string for a specified `event`. This appears to be a renamed version of the removed method `getResolution`.
+
+```
++ getExtraBond(event):
+```
+`getExtraBond` returns the bond amount used to challenge the initial resolution for a given `event`.
+
+```
++ setExtraBond(event, extraBond):
+```
+`setExtraBond` is used to set the challenge bond amount `extraBond` for a specified `event`.
+
+```
++ getEarlyResolutionBond(event):
+```
+`getEarlyResolutionBond` is used to retrieve the early resolution bond amount for a specified `event`.
+
+```
++ setEarlyResolutionBond(event, bond):
+```
+`setEarlyResolutionBond` is used to set the early resolution `bond` amount for a certain `event`.
+
+```
+- getResolution(event):
+
+- getEthical(event):
+
+- getBranch(event):
+```
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
