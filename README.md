@@ -491,5 +491,52 @@ The changes here come from the switch from plain `minValue` and `maxValue` to `f
 - getBranch(event):
 ```
 
+## src/data_api/expiringEvents.se
+
+### Data Structure of expiringEvents Contract:
+```
+data periodEventInfo[<branch>][<period>](
+  events[<index>],
+  eventToIndex[<event>],
+  requiredEvents[<event>],
+  committed[<event>],
+  subsidy[<event>],
+  eventWeight[<event>],
+  lesserReportNum[<event>],
+  numberEvents,
+  roundTwoNumEvents,
+  numReqEvents,
+  numberRemoved,
+  numEventsToReportOn,
+  feeValue,
+  afterFork
+)
+
+data reporterPeriodInfo[<branch>][<period>](
+  beforeRep[<address>],
+  afterRep[<address>],
+  periodDormantRep[<address>],
+  reportHash[<address>][<event>],
+  saltyEncryptedHash[<address>][<event>],
+  report[<address>][<event>],
+  ethics[<address>][<event>],
+  numReportsSubmitted[<event>],
+  periodRepWeight[<address>],
+  numberOfActiveReporters,
+  reporters[<index>]
+)
+
+data modeItems[<period>][<event>](
+  reportValue[<report>],
+  currentMode,
+  currentModeItems
+)
+```
+`expiringEvents`'s data structure has changed to a more simple structure overall. Previously there was a total of six data structures, but this has been shaved down to just three. The first is `periodEventInfo` which takes in a `branch` and `period`. `events[<index>]` and `eventToIndex[<event>]` are both arrays, `events[<index>]` contains a mapping of an index to event ID, where as `eventToIndex[<event>]` contains a mapping of an event ID to it's index. `requiredEvents[<event>]` contains a boolean to determine wether the event specified is required to be reported on. `committed[<event>]` keeps a count per event of how many reports have been committed so far for that event. `subsidy[<event>]` contains the amount of money used to payback the person who did the work to estimate the number of reporters needed for a specific `event`. `eventWeight[<event>]` contains event weight for a specific `event`. event weight is the number of reporters on an event in round 1 or the total rep reported on an event in backstop 1 or fork event.
+
+`lesserReportNum[<event>]` contains the number of reports you should have for a specified event. `numberEvents, roundTwoNumEvents, numReqEvents, numberRemoved` and `numEventsToReportOn` are all simple counts for the various things they are named for. The names seem descriptive enough to understand what each of those fields contain. `feeValue` returns the total fees for all markets on this `branch` expiring in this `period` denominated in `Wei`. `afterFork` contains the number of events created for a fork or 2 periods after the fork provided those events were created after the fork.
+
+The next data structure is `reporterPeriodInfo[<branch>][<period>]` which contains the reporter information for a specific `period`. `beforeRep[<address>]` and `afterRep[<address>]` both take in a reporter's address and return the amount of active rep for that reporter either before any modifications to `REP` for the period or after all modifications are complete. `periodDormantRep[<address>]` contains the amount of dormant `REP` for a specified account `address`. `reportHash[<address>][<event>]` contains the `reportHash` for a specific `event` submitted by a specific `address`. `saltyEncryptedHash[<address>][<event>]` holds the `saltyEncryptedHash` for a specific `address` and `event`. `report[<address>][<event>]` contains the actual reports for a specified reporter `address` and `event`. `ethics[<address>][<event>]` contains the ethicality of each report given a specified reporter `address` and `event`. `numReportsSubmitted[<event>]` is map of counts of the number of reports submitted for a specified `event` ID. `periodRepWeight[<address>]` contains weighting used used in the calculation of how many events a specific reporter `address` needs to report on. `numberOfActiveReporters` is the number of active Reporters for a specific `branch` and `period`. `reporters[<index>]` is a zero indexed array that maps to a reporter address. Finally we have `modeItems[<period>][<event>]` which is essentially unchanged except it's moved to a camelCase style instead of an_underscore_style of naming.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
