@@ -538,5 +538,156 @@ data modeItems[<period>][<event>](
 
 The next data structure is `reporterPeriodInfo[<branch>][<period>]` which contains the reporter information for a specific `period`. `beforeRep[<address>]` and `afterRep[<address>]` both take in a reporter's address and return the amount of active rep for that reporter either before any modifications to `REP` for the period or after all modifications are complete. `periodDormantRep[<address>]` contains the amount of dormant `REP` for a specified account `address`. `reportHash[<address>][<event>]` contains the `reportHash` for a specific `event` submitted by a specific `address`. `saltyEncryptedHash[<address>][<event>]` holds the `saltyEncryptedHash` for a specific `address` and `event`. `report[<address>][<event>]` contains the actual reports for a specified reporter `address` and `event`. `ethics[<address>][<event>]` contains the ethicality of each report given a specified reporter `address` and `event`. `numReportsSubmitted[<event>]` is map of counts of the number of reports submitted for a specified `event` ID. `periodRepWeight[<address>]` contains weighting used used in the calculation of how many events a specific reporter `address` needs to report on. `numberOfActiveReporters` is the number of active Reporters for a specific `branch` and `period`. `reporters[<index>]` is a zero indexed array that maps to a reporter address. Finally we have `modeItems[<period>][<event>]` which is essentially unchanged except it's moved to a camelCase style instead of an_underscore_style of naming.
 
+### expiringEvents method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! refundCost(to, value):
+```
+Changed: `refundCost(to, branch, period, event):` to require `branch`, `period`, and `event` for the event we plan to refund for the cost of calculating the required number of reporters. `value` has been removed from the params as the amount to refund is stored in `periodEventInfo[branch][period].subsidy[event]`.
+
+```
+! getRequired(event):
+```
+Changed: `getRequired(event, period, branch):` to also require a `branch` and `period` in order to return wether a specified `event` is required to be reported on.
+
+```
+! getEvents(branch, expDateIndex):
+
+! getEventsRange(branch, expDateIndex, start, end):
+
+! getNumEventsToReportOn(branch, expDateIndex):
+
+! getNumberEvents(branch, expDateIndex):
+
+! getEvent(branch, expDateIndex, eventIndex):
+
+! getReportHash(branch, expDateIndex, reporter, event):
+
+! setReportHash(branch, expDateIndex, reporter, reportHash, event):
+```
+Changed: The above functions have remained functionally the same, the only difference is that instead of `expDateIndex` the param has been renamed to simply `period`. Argument wise, the values remain the same.
+
+```
+! getEventIndex(period, eventID):
+```
+Changed: `getEventIndex(branch, period, event):` to also required a `branch` and renamed the param `eventID` to simply `event`.
+
+```
+! addEvent(branch, futurePeriod, eventID, subsidy):
+```
+Changed: `addEvent(branch, futurePeriod, event, subsidy, currency, wallet, afterFork):` to require more params because of the `currency` changes. `eventID` has been renamed to simply `event`, `currency` is the address of the `currency` we plan to use for this `event`. `wallet` is the wallet address of the wallet intended to contain the `currency` for this event, and `afterFork` is passed as 0 or 1, depending on if this event is being added after a fork or not.
+
+```
++ getSaltyEncryptedHash(branch, period, reporter, event):
++ setSaltyEncryptedHash(branch, period, reporter, saltyEncryptedHash, event):
++ getPeriodRepWeight(branch, votePeriod, sender):
++ setPeriodRepWeight(branch, votePeriod, sender, value):
++ getNumReportsSubmitted(branch, votePeriod, sender):
++ getEventWeight(branch, votePeriod, event):
++ getReportsCommitted(branch, period, event):
++ getFeeValue(branch, expIndex):
++ adjustPeriodFeeValue(branch, expIndex, amount):
++ setEventWeight(branch, votePeriod, event, num):
++ countReportAsSubmitted(branch, votePeriod, event, sender, weight):
++ addReportToReportsSubmitted(branch, period, user):
++ getActiveReporters(branch, period, from, to):
++ getNumActiveReporters(branch, period):
++ getAfterFork(branch, votePeriod):
+```
+
+
+```
+- getEncryptedReport(branch, expDateIndex, reporter, event):
+
+- setEncryptedReport(branch, expDateIndex, reporter, report, salt, ethics, events):
+
+- getReportersPaidSoFar(branch, event):
+
+- addReportersPaidSoFar(branch, event):
+
+- getPeriodRepConstant(branch, votePeriod, sender):
+
+- setPeriodRepConstant(branch, votePeriod, sender, value):
+
+- getRepEvent(branch, votePeriod, event):
+
+- getNumReportsEvent(branch, votePeriod, eventID):
+
+- getNumReportsActual(branch, votePeriod, sender):
+
+- getShareValue(branch, expIndex):
+
+- adjustPeriodShareValueOutstanding(branch, expIndex, amount):
+
+- addRepEvent(branch, votePeriod, event, amount):
+
+- setNumReportsEvent(branch, votePeriod, eventID, num):
+
+- addReportToEvent(branch, votePeriod, eventID, sender):
+```
+
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
+
+master:
+  - getEncryptedReport(branch, expDateIndex, reporter, event):
+  - setEncryptedReport(branch, expDateIndex, reporter, report, salt, ethics, events):
+  - getReportersPaidSoFar(branch, event):
+  - addReportersPaidSoFar(branch, event):
+! refundCost(to, value):
+  - getPeriodRepConstant(branch, votePeriod, sender):
+  - setPeriodRepConstant(branch, votePeriod, sender, value):
+  - getRepEvent(branch, votePeriod, event):
+  - getNumReportsEvent(branch, votePeriod, eventID):
+  - getNumReportsActual(branch, votePeriod, sender):
+! getRequired(event):
+! getEvents(branch, expDateIndex):
+! getEventsRange(branch, expDateIndex, start, end):
+! getEventIndex(period, eventID):
+! getNumEventsToReportOn(branch, expDateIndex):
+  - getShareValue(branch, expIndex):
+! getNumberEvents(branch, expDateIndex):
+! getEvent(branch, expDateIndex, eventIndex):
+! getReportHash(branch, expDateIndex, reporter, event):
+! addEvent(branch, futurePeriod, eventID, subsidy):
+  - adjustPeriodShareValueOutstanding(branch, expIndex, amount):
+! setReportHash(branch, expDateIndex, reporter, reportHash, event):
+  - addRepEvent(branch, votePeriod, event, amount):
+  - setNumReportsEvent(branch, votePeriod, eventID, num):
+  - addReportToEvent(branch, votePeriod, eventID, sender):
+
+dev:
++ getSaltyEncryptedHash(branch, period, reporter, event):
++ setSaltyEncryptedHash(branch, period, reporter, saltyEncryptedHash, event):
+! refundCost(to, branch, period, event):
++ getPeriodRepWeight(branch, votePeriod, sender):
++ setPeriodRepWeight(branch, votePeriod, sender, value):
+! getReportHash(branch, period, reporter, event):
++ getNumReportsSubmitted(branch, votePeriod, sender):
++ getEventWeight(branch, votePeriod, event):
+! getRequired(event, period, branch):
+! getEvents(branch, period):
+! getEventsRange(branch, period, start, end):
++ getReportsCommitted(branch, period, event):
+! getEventIndex(branch, period, event):
+! getNumEventsToReportOn(branch, period):
++ getFeeValue(branch, expIndex):
+! getNumberEvents(branch, period):
+! getEvent(branch, period, eventIndex):
+! addEvent(branch, futurePeriod, event, subsidy, currency, wallet, afterFork):
++ adjustPeriodFeeValue(branch, expIndex, amount):
+! setReportHash(branch, period, reporter, reportHash, event):
++ setEventWeight(branch, votePeriod, event, num):
++ countReportAsSubmitted(branch, votePeriod, event, sender, weight):
++ addReportToReportsSubmitted(branch, period, user):
++ getActiveReporters(branch, period, from, to):
++ getNumActiveReporters(branch, period):
++ getAfterFork(branch, votePeriod):
