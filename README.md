@@ -734,6 +734,164 @@ Changed: `setInfo(ID, description: str, creator, fxpFee, currency, wallet):` so 
 ```
 `setCurrencyAndWallet(ID, currency, wallet):` was added to set the `currency` and `wallet` used for the specified branch, event, or market `ID`.
 
+## src/data_api/markets.se
+
+### Data Structure of markets Contract:
+```
+data Markets[<market>](
+  events[<index>],
+  lenEvents,
+  sharesPurchased[<index(starts at 1)>],
+  participants[<address>](
+    shares[<outcome>]
+  ),
+  winningOutcomes[<index>],
+  cumulativeScale,
+  numOutcomes,
+  tradingPeriod,
+  fxpTradingFee,
+  branch,
+  volume,
+  pushingForward,
+  bondsMan,
+  originalPeriod,
+  orderIDs[<order>](
+    id,
+    nextID,
+    prevID
+  ),
+  lastOrder,
+  totalOrders,
+  tag1,
+  tag2,
+  tag3,
+  extraInfo[<index>],
+  extraInfoLen,
+  sharesValue,
+  gasSubsidy,
+  fees,
+  lastExpDate,
+  prices[<outcome>],
+  shareContracts[<outcome>]
+)
+
+data marketsHash[<branch>]
+```
+
+### markets method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+. . .
 
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
+
+m:
+data Markets[](events[], lenEvents, sharesPurchased[], participants[](shares[]), winningOutcomes[], cumulativeScale, numOutcomes, tradingPeriod, tradingFee, branch, volume, pushingForward, bondsMan, originalPeriod, trade_ids[](id, next_id, prev_id), last_trade, total_trades, tag1, tag2, tag3, makerFees, extraInfo[], extraInfoLen, sharesValue, gasSubsidy, fees, creationBlock, creationTime, lastExpDate, prices[])
+
+addFees(market, amount):
+setPrice(market, outcome, price):
+refundClosing(market, to):
+getLastExpDate(market):
+getLastOutcomePrice(market, outcome):
+getFees(market):
+getMakerFees(market):
+getgasSubsidy(market):
+getSharesValue(market):
+returnTags(market):
+getTopic(market):
+getTotalSharesPurchased(market):
+getMarketEvent(market, index):
+getCreationTime(market):
+getCreationBlock(market):
+getMarketEvents(market):
+getSharesPurchased(market, outcome):
+getExtraInfoLength(market):
+getExtraInfo(market):
+getVolume(market):
+getParticipantSharesPurchased(market, trader, outcome):
+getNumEvents(market):
+getCumScale(market):
+getMarketNumOutcomes(market):
+getTradingPeriod(market):
+getOriginalTradingPeriod(market):
+setTradingPeriod(market, period):
+getTradingFee(market):
+getBranchID(market):
+initializeMarket(marketID, events: arr, tradingPeriod, tradingFee, branch, tag1, tag2, tag3, makerFees, cumScale, numOutcomes, extraInfo: str, gasSubsidy, creationFee, lastExpDate):
+modifyShares(marketID, outcome, amount):
+modifySharesValue(marketID, amount):
+modifyParticipantShares(marketID, trader, outcome, amount, cancel):
+setWinningOutcomes(market, outcomes: arr):
+getWinningOutcomes(market):
+getOneWinningOutcome(market, num):
+setTradingFee(market, fee):
+setMakerFees(market, makerFees):
+setPushedForward(market, bool, sender):
+getPushedForward(market):
+getBondsMan(market):
+getLastTrade(market):
+addTrade(market, trade_id, last_id):
+remove_trade_from_market(market_id, trade_id):
+get_trade_ids(market_id, offset, numTradesToLoad):
+get_total_trades(market_id):
+
+d:
+data Markets[](events[], lenEvents, sharesPurchased[], participants[](shares[]), winningOutcomes[], cumulativeScale, numOutcomes, tradingPeriod, fxpTradingFee, branch, volume, pushingForward, bondsMan, originalPeriod, orderIDs[](id, nextID, prevID), lastOrder, totalOrders, tag1, tag2, tag3, extraInfo[], extraInfoLen, sharesValue, gasSubsidy, fees, lastExpDate, prices[], shareContracts[])
+
+# takes branch as param, composite hash of all markets in the system
+data marketsHash[]
+
+getMarketsHash(branch):
+addToMarketsHash(branch, newHash):
+addFees(market, fxpAmount):
+setPrice(market, outcome, fxpPrice):
+refundClosing(market, to):
+getLastExpDate(market):
+getLastOutcomePrice(market, outcome):
+getFees(market):
+getGasSubsidy(market):
+getSharesValue(market):
+returnTags(market):
+getTotalSharesPurchased(market):
+getMarketEvent(market, index):
+getMarketEvents(market):
+getMarketShareContracts(market):
+getSharesPurchased(market, outcome):
+getExtraInfoLength(market):
+getExtraInfo(market):
+getVolume(market):
+getParticipantSharesPurchased(market, trader, outcome):
+getNumEvents(market):
+getCumulativeScale(market):
+getMarketNumOutcomes(market):
+getTradingPeriod(market):
+getOriginalTradingPeriod(market):
+setTradingPeriod(market, period):
+getTradingFee(market):
+getBranch(market):
+initializeMarket(market, events: arr, tradingPeriod, fxpTradingFee, branch, tag1, tag2, tag3, fxpcumulativeScale, numOutcomes, extraInfo: str, gasSubsidy, fxpCreationFee, lastExpDate, shareContracts: arr):
+modifyShares(market, outcome, fxpAmount):
+modifySharesValue(market, fxpAmount):
+modifyParticipantShares(market, trader, outcome, fxpAmount, actualTrade):
+addOrder(market, orderID):
+removeOrderFromMarket(marketID, orderID):
+getOrderIDs(marketID):
+setWinningOutcomes(market, outcomes: arr):
+getWinningOutcomes(market):
+getOneWinningOutcome(market, num):
+setTradingFee(market, fee):
+setMakerFees(market, makerFees):
+setPushedForward(market, bool, sender):
+getPushedForward(market):
+getBondsMan(market):
+getLastOrder(market):
+getPrevID(market, order):
+getTotalOrders(marketID):
+getSender():
