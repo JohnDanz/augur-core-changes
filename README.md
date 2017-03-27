@@ -690,6 +690,50 @@ Changed: `addEvent(branch, futurePeriod, event, subsidy, currency, wallet, after
 - addReportToEvent(branch, votePeriod, eventID, sender):
 ```
 
+## src/data_api/info.se
+
+### Data Structure of info Contract:
+```
+data Info[<branch/event/market ID>](
+  description[2048],
+  descriptionLength,
+  creator,
+  creationFee,
+  wallet,
+  currency
+)
+```
+`info`'s data structure has only changed slightly. It still is indexed by an `ID` (this can be a branch ID, an event ID, or a market ID since these all share the same types of metadata). The new fields are `wallet` and `currency` which were added to accommodate the changes in the contracts to using the `currency` system.
+
+### info method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! setInfo(ID, description: str, creator, fee):
+```
+Changed: `setInfo(ID, description: str, creator, fxpFee, currency, wallet):` so that it would also take in a `currency` address and `wallet` address for the entered `currency`. Another change is `fee` has become `fxpFee` to indicate that the value is fixed point.
+
+```
++ getCurrency(ID):
+```
+`getCurrency(ID):` was added to return the `currency` used for the specified branch, event, or market `ID`.
+
+```
++ getWallet(ID):
+```
+`getWallet(ID):` was added to get the `wallet` used for the specified branch, event, or market `ID`.
+
+```
++ setCurrencyAndWallet(ID, currency, wallet):
+```
+`setCurrencyAndWallet(ID, currency, wallet):` was added to set the `currency` and `wallet` used for the specified branch, event, or market `ID`.
+
 
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
