@@ -586,21 +586,78 @@ Changed: `addEvent(branch, futurePeriod, event, subsidy, currency, wallet, after
 
 ```
 + getSaltyEncryptedHash(branch, period, reporter, event):
+```
+`getSaltyEncryptedHash` was added to return the encrypted hash for a specified `branch`, `period`, and `event` that was submitted by `reporter`.
+
+```
 + setSaltyEncryptedHash(branch, period, reporter, saltyEncryptedHash, event):
+```
+`setSaltyEncryptedHash` was added to set the encrypted hash, `saltyEncryptedHash`, for a specific `reporter` given a `branch`, `period`, and `event`.
+
+```
 + getPeriodRepWeight(branch, votePeriod, sender):
+```
+`getPeriodRepWeight` was added to return the weight used to calculate how many events a reporter, `sender`, should report on for a specified `branch` and `votePeriod`.
+
+```
 + setPeriodRepWeight(branch, votePeriod, sender, value):
+```
+`setPeriodRepWeight` was added to set the REP weight for a specific reporter, `sender`, to a `value` given a `branch` and `votePeriod`.
+
+```
 + getNumReportsSubmitted(branch, votePeriod, sender):
+```
+`getNumReportsSubmitted` returns the number of reports submitted by `sender` in a specified `branch` and `votePeriod`.
+
+```
 + getEventWeight(branch, votePeriod, event):
+```
+`getEventWeight` returns either the number of reports for a specific `event` on a `branch` and `votePeriod` if the `event` is a round 1 event. If it's in backstop 1 or a fork event it will return the total REP reported on the event.
+
+```
 + getReportsCommitted(branch, period, event):
+```
+`getReportsCommitted` returns the amount of reports committed for a specific `event` in a `branch` and `period`.
+
+```
 + getFeeValue(branch, expIndex):
+```
+`getFeeValue` returns the value of all fees, for all markets that have events that will be expiring in a specific `branch` and period `expIndex`.
+
+```
 + adjustPeriodFeeValue(branch, expIndex, amount):
+```
+`adjustPeriodFeeValue` is used to modify the value of all the fees for all markets that have events expiring in a specific `branch` and period `expIndex` by a specific `amount`.
+
+```
 + setEventWeight(branch, votePeriod, event, num):
+```
+`setEventWeight` is used to set the event weight to a specific value `num` for a given `branch`, `votePeriod`, and `event`.
+
+```
 + countReportAsSubmitted(branch, votePeriod, event, sender, weight):
+```
+`countReportAsSubmitted` is used to increment an event's weight, and update the number of reports submitted. `branch`, `votePeriod`, and `event` are used to target the specific `event`, `weight` is the weight value to be added to the specific `event` and `sender` is used to target the reporter to increment it's number of reports submitted count.
+
+```
 + addReportToReportsSubmitted(branch, period, user):
+```
+`addReportToReportsSubmitted` is used to increment the count of reports submitted for a specific reporter `user` in a `branch` and `period`.
+
+```
 + getActiveReporters(branch, period, from, to):
+```
+`getActiveReporters` returns an array of active reporter addresses for a specific `branch` and `period` given a start, `from`, and end, `to`, index.
+
+```
 + getNumActiveReporters(branch, period):
+```
+`getNumActiveReporters` returns the number of active reporters for a given `branch` and `period`.
+
+```
 + getAfterFork(branch, votePeriod):
 ```
+`getAfterFork` returns the number of events created for a fork period or 2 periods after a fork provided that the events were created after the fork. It takes a specific `branch` and `votePeriod` to return the number.
 
 
 ```
@@ -636,58 +693,3 @@ Changed: `addEvent(branch, futurePeriod, event, subsidy, currency, wallet, after
 
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
-
-master:
-  - getEncryptedReport(branch, expDateIndex, reporter, event):
-  - setEncryptedReport(branch, expDateIndex, reporter, report, salt, ethics, events):
-  - getReportersPaidSoFar(branch, event):
-  - addReportersPaidSoFar(branch, event):
-! refundCost(to, value):
-  - getPeriodRepConstant(branch, votePeriod, sender):
-  - setPeriodRepConstant(branch, votePeriod, sender, value):
-  - getRepEvent(branch, votePeriod, event):
-  - getNumReportsEvent(branch, votePeriod, eventID):
-  - getNumReportsActual(branch, votePeriod, sender):
-! getRequired(event):
-! getEvents(branch, expDateIndex):
-! getEventsRange(branch, expDateIndex, start, end):
-! getEventIndex(period, eventID):
-! getNumEventsToReportOn(branch, expDateIndex):
-  - getShareValue(branch, expIndex):
-! getNumberEvents(branch, expDateIndex):
-! getEvent(branch, expDateIndex, eventIndex):
-! getReportHash(branch, expDateIndex, reporter, event):
-! addEvent(branch, futurePeriod, eventID, subsidy):
-  - adjustPeriodShareValueOutstanding(branch, expIndex, amount):
-! setReportHash(branch, expDateIndex, reporter, reportHash, event):
-  - addRepEvent(branch, votePeriod, event, amount):
-  - setNumReportsEvent(branch, votePeriod, eventID, num):
-  - addReportToEvent(branch, votePeriod, eventID, sender):
-
-dev:
-+ getSaltyEncryptedHash(branch, period, reporter, event):
-+ setSaltyEncryptedHash(branch, period, reporter, saltyEncryptedHash, event):
-! refundCost(to, branch, period, event):
-+ getPeriodRepWeight(branch, votePeriod, sender):
-+ setPeriodRepWeight(branch, votePeriod, sender, value):
-! getReportHash(branch, period, reporter, event):
-+ getNumReportsSubmitted(branch, votePeriod, sender):
-+ getEventWeight(branch, votePeriod, event):
-! getRequired(event, period, branch):
-! getEvents(branch, period):
-! getEventsRange(branch, period, start, end):
-+ getReportsCommitted(branch, period, event):
-! getEventIndex(branch, period, event):
-! getNumEventsToReportOn(branch, period):
-+ getFeeValue(branch, expIndex):
-! getNumberEvents(branch, period):
-! getEvent(branch, period, eventIndex):
-! addEvent(branch, futurePeriod, event, subsidy, currency, wallet, afterFork):
-+ adjustPeriodFeeValue(branch, expIndex, amount):
-! setReportHash(branch, period, reporter, reportHash, event):
-+ setEventWeight(branch, votePeriod, event, num):
-+ countReportAsSubmitted(branch, votePeriod, event, sender, weight):
-+ addReportToReportsSubmitted(branch, period, user):
-+ getActiveReporters(branch, period, from, to):
-+ getNumActiveReporters(branch, period):
-+ getAfterFork(branch, votePeriod):
