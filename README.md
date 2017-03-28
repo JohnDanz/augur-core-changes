@@ -840,6 +840,41 @@ Renamed `getLastOrder(market):`.
 ```
 Renamed `getTotalOrders(marketID):`.
 
+```
+! remove_trade_from_market(market_id, trade_id):
+```
+Renamed `removeOrderFromMarket(marketID, orderID):`. It was also modified to use `marketID` and `orderID` instead of `market_id` and `trade_id` as it's params.
+
+```
+! initializeMarket(marketID, events: arr, tradingPeriod, tradingFee, branch, tag1, tag2, tag3, makerFees, cumScale, numOutcomes, extraInfo: str, gasSubsidy, creationFee, lastExpDate):
+```
+Changed `initializeMarket(market, events: arr, tradingPeriod, fxpTradingFee, branch, tag1, tag2, tag3, fxpcumulativeScale, numOutcomes, extraInfo: str, gasSubsidy, fxpCreationFee, lastExpDate, shareContracts: arr):` in a a few ways. `marketID` has been changed to just `market`. `tradingFee`, `cumScale`, and `creationFee` have all been renamed to `fxpTradingFee`, `fxpcumulativeScale`, and `fxpCreationFee` respectively to indicate that they are all fixed point values. `makerFees` has been removed. Finally `shareContracts` array was added, this array contains the addresses for erc20 share tokens for each outcome in the market.
+
+```
++ getMarketsHash(branch):
+```
+`getMarketsHash` was added to return the composite market hash of all markets on the specified `branch`.
+
+```
++ addToMarketsHash(branch, newHash):
+```
+`addToMarketsHash` is used to add a new market hash, `newHash` to the composite markets hash on a specified `branch`. This is done by taking the current composite market hash, and the new hash into an array of length 2, then rehashed using SHA3.
+
+```
++ getMarketShareContracts(market):
+```
+`getMarketShareContracts` returns an array of share erc20 token contract addresses, one for each outcome in the `market` specified.
+
+```
++ getOrderIDs(marketID):
+```
+`getOrderIDs` returns an array of orderIDs for a specific `marketID`.
+
+```
++ getPrevID(market, order):
+```
+`getPrevID` returns the previous `order` to the specified `order` on a specific `market`.
+
 
 ```
 - getMakerFees(market):
@@ -847,6 +882,8 @@ Renamed `getTotalOrders(marketID):`.
 - setMakerFees(market, makerFees):
 
 - getTopic(market):
+
+- get_trade_ids(market_id, offset, numTradesToLoad):
 
 - getCreationTime(market):
 
@@ -856,45 +893,5 @@ Renamed `getTotalOrders(marketID):`.
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
 
-m:
-! addFees(market, amount):
-! setPrice(market, outcome, price):
-- getMakerFees(market):
-! getgasSubsidy(market):
-- getTopic(market):
-- getCreationTime(market):
-- getCreationBlock(market):
-! getCumScale(market):
-! getBranchID(market):
-! initializeMarket(marketID, events: arr, tradingPeriod, tradingFee, branch, tag1, tag2, tag3, makerFees, cumScale, numOutcomes, extraInfo: str, gasSubsidy, creationFee, lastExpDate):
-! modifyShares(marketID, outcome, amount):
-! modifySharesValue(marketID, amount):
-! modifyParticipantShares(marketID, trader, outcome, amount, cancel):
-?- setMakerFees(market, makerFees):
-! getLastTrade(market):
-! addTrade(market, trade_id, last_id): (became addOrder)
-! remove_trade_from_market(market_id, trade_id): (became removeOrderFromMarket)
-- get_trade_ids(market_id, offset, numTradesToLoad):
-! get_total_trades(market_id): (getTotalOrders)
 
-d:
-+ getMarketsHash(branch):
-+ addToMarketsHash(branch, newHash):
-! addFees(market, fxpAmount):
-! setPrice(market, outcome, fxpPrice):
-! getGasSubsidy(market):
-+ getMarketShareContracts(market):
-! getCumulativeScale(market):
-! getBranch(market):
-! initializeMarket(market, events: arr, tradingPeriod, fxpTradingFee, branch, tag1, tag2, tag3, fxpcumulativeScale, numOutcomes, extraInfo: str, gasSubsidy, fxpCreationFee, lastExpDate, shareContracts: arr):
-! modifyShares(market, outcome, fxpAmount):
-! modifySharesValue(market, fxpAmount):
-! modifyParticipantShares(market, trader, outcome, fxpAmount, actualTrade):
-+ addOrder(market, orderID):
-+ removeOrderFromMarket(marketID, orderID):
-getOrderIDs(marketID):
-?- setMakerFees(market, makerFees):
-! getLastOrder(market):
-+ getPrevID(market, order):
-! getTotalOrders(marketID):
-+ getSender():
+!addTrade(market, trade_id, last_id):(became addOrder?)+addOrder(market, orderID):
