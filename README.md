@@ -890,8 +890,97 @@ Changed `initializeMarket(market, events: arr, tradingPeriod, fxpTradingFee, bra
 - getCreationBlock(market):
 ```
 
+## src/data_api/reporting.se
+
+### Data Structure of reporting Contract:
+```
+data Reporting[<branch>](
+  reputation[<index>](
+    repValue,
+    reporterID
+  ),
+  numberReporters,
+  repIDtoIndex[<address>],
+  totalRep,
+  dormantRep[<index>](
+    repValue,
+    reporterID
+  ),
+  activeRep,
+  fork,
+  reportedOnNonFinalRoundTwoEvent
+)
+
+data whitelists[<contract>](
+  addresses[<address>],
+  taken
+)
+```
+The only addition here is `reportedOnNonFinalRoundTwoEvent` added to the `Reporting[<branch>]` data structure. When a person reports on a round 2 event before it was in the second round [i.e. the first reporting backstop], then `reportedOnNonFinalRoundTwoEvent` will be set to the eventID of the event that was reported on. A reporter cannot convert their rep to dormant or send rep until they've finished the resolution process for that round 2 event. Once the round 2 event is final then `reportedOnNonFinalRoundTwoEvent` should be set to 0. Otherwise the data structure for reporting has remained the same.
+
+
+### reporting method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! adjustActiveRep(branch, amount):
+```
+Changed `adjustActiveRep(branch, fxpAmount):` to use `fxpAmount` instead of `amount` to indicate that this value should be fixed point.
+
+```
+! setInitialReporters(parent, branchID):
+```
+Changed `setInitialReporters(branch):` to no longer require a `parent` param and `branchID` has been renamed to simply `branch`.
+
+```
+! addReporter(branch, sender, amount, dormant, repToBonderOrBranch):
+```
+Changed `addReporter(branch, sender, fxpAmount, fxpDormant, fxpRepToBonderOrBranch):` has had `amount`, `dormant`, and `repToBonderOrBranch` renamed to `fxpAmount`, `fxpDormant`, and `fxpRepToBonderOrBranch` respectively in order to indicate they are fixed point values.
+
+```
+! addRep(branch, index, value):
+! subtractRep(branch, index, value):
+! setRep(branch, index, newRep):
+! addDormantRep(branch, index, value):
+! subtractDormantRep(branch, index, value):
+```
+Changed:
+```
+addRep(branch, index, fxpValue):
+subtractRep(branch, index, fxpValue):
+setRep(branch, index, fxpNewRep):
+addDormantRep(branch, index, fxpValue):
+subtractDormantRep(branch, index, fxpValue):
+```
+The 5 methods above have renamed the `value` or `newRep` params to `fxpValue` or `fxpNewRep` to indicate that they should be a fixed point value.
+
+```
+! setSaleDistribution(addresses: arr, balances: arr, branchID):
+```
+Changed `setSaleDistribution(addresses: arr, balances: arr, branch):` changed `branchID` to simply `branch`.
+
+```
++ getReportedOnNonFinalRoundTwoEvent(branch):
+```
+`getReportedOnNonFinalRoundTwoEvent` was added to return the value contained in `reportedOnNonFinalRoundTwoEvent` given a specified `branch`. This will result in an `eventID` or `0` being returned.
+
+```
++ setReportedOnNonFinalRoundTwoEvent(branch, event):
+```
+`setReportedOnNonFinalRoundTwoEvent` has been added to set the `reportedOnNonFinalRoundTwoEvent` value to the `event` passed on the specified `branch`.
+
+```
++ claimInitialRep():
+```
+`claimInitialRep` is used to claim initial `REP` for the sender from the `repContract`. This `REP` will be dormant until activated.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
-
 
 !addTrade(market, trade_id, last_id):(became addOrder?)+addOrder(market, orderID):
