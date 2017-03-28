@@ -985,5 +985,45 @@ Changed `setSaleDistribution(addresses: arr, balances: arr, branch):` changed `b
 ```
 `claimInitialRep` is used to claim initial `REP` for the sender from the `repContract`. This `REP` will be dormant until activated.
 
+## src/data_api/reportingThreshold.se
+
+### Data Structure of reportingThreshold Contract:
+
+`reportingThreshold` has no data structure of it's own. It contains all the methods required to deal with reporting thresholds.
+
+### reportingThreshold methods:
+*This is a new contract, as such all methods are new methods.*
+
+```
+calculateReportingThreshold(branch, event, period, sender):
+```
+`calculateReportingThreshold` is used to determine the reporting threshold for a specified `event` and `sender` in a specific `branch` and `period`. This function returns the calculated reporting threshold, which is used to determine if a reporter should report on a specific `event` or not.
+
+```
+getEventsToReportOn(branch, period, sender, start, end):
+```
+`getEventsToReportOn` is used to get a list of events for a reporter to report on given an index range for the pool of events to select from. This method determines what reports a specific `sender` should report on in a given `branch` and `period`. This takes a `start` and `end` index to limit the potential events that might be selected for a reporter. Any event where the `sender`'s SHA3 hash of their `address` + the `eventID` normalized to 1 is below the report threshold for the specific event will be added to the list of events to report on for the `sender`.
+
+```
+getEventCanReportOn(branch, period, reporter, event):
+```
+`getEventCanReportOn` is used to determine if a `reporter` is eligible to report on a specific `event` in a given `branch` and `period`. returns `1` if they can, `0` if they cannot.
+
+```
+setReportingThreshold(event):
+```
+`setReportingThreshold` is used to change to change the threshold of a given `event` to the maximum threshold. In the rare possibility that less than 3 reporters get randomly selected to report on a market in a given period, on the last day, we can change the SHA3 threshold using this function. This would be called from the UI.
+
+```
+calculateNumberOfEventsAReporterHasToReportOnAtMinimum(branch, reporter, period):
+```
+`calculateNumberOfEventsAReporterHasToReportOnAtMinimum` is used to return the minimum number of events a `reporter` needs to report on for a given `branch` and `period`. For example, if the `reporter` is eligible to report on 4 events, the minimum amount of events the `reporter` must report on is 2.
+
+```
+findLazyReportersAndLeechers(branch, votePeriod, reporterStart, reporterEnd, eventStart, eventEnd):
+```
+`findLazyReportersAndLeechers` is used to penalize people who had at least 1 REP active but didn't report on the minimum number of reports. It loops through the list of active reporters, given a range from `reporterStart` to `reporterEnd` for a specific `branch` and `votePeriod`. It checks reporters minimum number of events to report on given a range from `eventStart` to `eventEnd`. Both `reporterEnd` and `eventEnd` will default to the total number of reporters or events respectively if they are passed as 0. If the reporters have reported on less than the minimum we find an example of an event they could have reported on but didn't and then return two arrays, one with address of reporters who need to be penalized and another of the example event addresses they could have reported on.
+
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
