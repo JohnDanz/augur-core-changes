@@ -848,7 +848,12 @@ Renamed `removeOrderFromMarket(marketID, orderID):`. It was also modified to use
 ```
 ! initializeMarket(marketID, events: arr, tradingPeriod, tradingFee, branch, tag1, tag2, tag3, makerFees, cumScale, numOutcomes, extraInfo: str, gasSubsidy, creationFee, lastExpDate):
 ```
-Changed `initializeMarket(market, events: arr, tradingPeriod, fxpTradingFee, branch, tag1, tag2, tag3, fxpcumulativeScale, numOutcomes, extraInfo: str, gasSubsidy, fxpCreationFee, lastExpDate, shareContracts: arr):` in a a few ways. `marketID` has been changed to just `market`. `tradingFee`, `cumScale`, and `creationFee` have all been renamed to `fxpTradingFee`, `fxpcumulativeScale`, and `fxpCreationFee` respectively to indicate that they are all fixed point values. `makerFees` has been removed. Finally `shareContracts` array was added, this array contains the addresses for erc20 share tokens for each outcome in the market.
+Changed `initializeMarket(market, events: arr, tradingPeriod, fxpTradingFee, branch, tag1, tag2, tag3, fxpcumulativeScale, numOutcomes, extraInfo: str, gasSubsidy, fxpCreationFee, lastExpDate, shareContracts: arr):`. `marketID` has been changed to just `market`. `tradingFee`, `cumScale`, and `creationFee` have all been renamed to `fxpTradingFee`, `fxpcumulativeScale`, and `fxpCreationFee` respectively to indicate that they are all fixed point values. `makerFees` has been removed. Finally `shareContracts` array was added, this array contains the addresses for erc20 share tokens for each outcome in the market.
+
+```
+! addTrade(market, trade_id, last_id):
+```
+Changed `addOrder(market, orderID):`. `addTrade` has been renamed to `addOrder` and has had it's params updated. `trade_id` has been changed to `orderID` and `last_id` is no longer required so the param has been dropped completely.
 
 ```
 + getMarketsHash(branch):
@@ -982,5 +987,3 @@ Changed `setSaleDistribution(addresses: arr, balances: arr, branch):` changed `b
 
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
-
-!addTrade(market, trade_id, last_id):(became addOrder?)+addOrder(market, orderID):
