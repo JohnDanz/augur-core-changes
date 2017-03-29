@@ -1145,5 +1145,48 @@ Changed `fillOrder(orderID, fill, money, shares):` was renamed to `fillOrder`. r
 - getSender():
 ```
 
+## src/functions/bidAndAsk.se
+
+### Data Structure of bidAndAsk Contract:
+```
+event logAddTx(market:indexed, sender:indexed, type, fxpPrice, fxpAmount, outcome, orderID, moneyEscrowed, sharesEscrowed)
+
+event logCancel(market:indexed, sender:indexed, fxpPrice, fxpAmount, orderID, outcome, type, money, shares)
+
+event buyAndSellSharesLogReturn(returnValue)
+```
+There is no data structures for the `bidAndAsk` contract but there are events defined that are emitted by some of the methods in `bidAndAsk`. It appears that for the most part, what used to be `buy&sellShares.se` has been renamed to `bidAndAsk.se` and some methods have been removed and have been replaced with a more all encompassing `placeOrder` method instead of individual `buy`, `sell`, and `shortAsk` methods.
+
+`logAddTx` is fired off when `placeOrder` is called and it is successful. `logCancel` is fired off when a user decides to `cancel` an order. `buyAndSellSharesLogReturn` is fired off to indicate wether the attempt to place or cancel an order was successful or not. If you place an order, and it's successful it will log the orderID as the `returnValue`. If it's a failure, it will log `0` which is a failure. If you attempt to cancel an order, and it's successful then the returnValue for the log will be `1` which is a success.
+
+### bidAndAsk method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! cancel(trade_id):
+```
+Changed `cancel(orderID):` to use `orderID` instead of `trade_id` as the param. This function is used to cancel an order before it's been filled. This will refund the shares or money in escrow to the message sender. It also creates a `logCancel` log event to show what order was canceled. When it completes successfully it will fire off another event to be logged: `buyAndSellSharesLogReturn`. The `buyAndSellSharesLogReturn` log will have it's `returnValue` set to `1` (Success) if the order was successfully canceled or `0` (Failure) if the order couldn't be canceled.
+
+```
++ placeOrder(type, fxpAmount, fxpPrice, market, outcome):
+```
+`placeOrder` is a new method that is used for all orders. It takes a `type` of order, bid (`1`) or ask (`2`). Next it takes the amount of shares in fixed point `fxpAmount`. Then the price per share in fixed point `fxpPrice`. Which `market` and on what `outcome` we are placing this order are the final arguments. As with `cancel` above, there are logs generated from calling `placeOrder`. If the order is placed successfully we should see a `logAddTx` log saved with the order details. We will also see a `buyAndSellSharesLogReturn` which will have it's `returnValue` set to the `orderID` of the successfully placed order. If the order is not placed successfully there will be no `logAddTx` created and `buyAndSellSharesLogReturn` log will have it's `returnValue` set to `0` (Failure).
+
+
+The below are methods that used to exist in `buy&sellShares.se` but don't exist in `bidAndAsk.se`. I've included them to make it clear that these functions don't exist anymore in the new contracts.
+```
+- shortAsk(amount, price, market, outcome, minimumTradeSize, tradeGroupID):
+
+- buy(amount, price, market, outcome, minimumTradeSize, tradeGroupID):
+
+- sell(amount, price, market, outcome, minimumTradeSize, isShortAsk, tradeGroupID):
+```
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
