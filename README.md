@@ -284,6 +284,27 @@ A few things have changed with `initializeBranch`, `minTradingFee` has become th
 - getSomeMarketsInBranch(branch, initial, last):
 ```
 
+## src/data_api/compositeGetters.se
+
+### Data Structure of compositeGetters Contract:
+
+compositeGetters doesn't have it's own data structure, it's also been moved from the `functions` folder to the `data_api` folder.
+
+### compositeGetters method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! getOrderBook(marketID, offset, numTradesToLoad):
+```
+Changed `getOrderBook(marketID, offset, numOrdersToLoad):` to use `numOrdersToLoad` instead of `numTradesToLoad`, however the function remains functionally unchanged.
+
+
 ## src/data_api/consensusData.se
 
 ### Data Structure of consensusData Contract:
@@ -390,8 +411,12 @@ data Events[<event>](
 )
 
 data past24Hours[<period>]
+
+event logOutcome(event:indexed, outcome)
 ```
 Changes in the event contract's data structure include the change from `minValue, maxValue` to `fxpMinValue, fxpMaxValue` to further indicate that the minimum value and maximum value should be fixed point. `reportersPaidSoFarForEvent` contains the number of reporters who have been paid so far for a particular event. `resolutionAddress` is the address used to resolve an event first. `extraBond` contains the bond amount used to challenge the initial resolution. `firstPreliminaryOutcome` contains the outcome reported by the `resolutionAddress`. `challenged` contains a boolean of whether the event has been challenged already or not. `resolveBondPoster` is the address that posted the `REP` bond for the first resolution period. `earlyResolutionBond` contains the bond amount paid for an early resolution of a specified event. Finally `creationTime` was added to hold the timestamp of when a specified event was created.
+
+Finally, one log event is defined in this contract called `logOutcome`. It stores an `event` and `outcome`. This log is fired off by the `getOutcome` method if the message sender calling `getOutcome` isn't the owner of the `event` or on the whitelist.
 
 ### events method changes, additions, and removals:
 ```
@@ -1048,7 +1073,6 @@ data orders[<order>](
 )
 ```
 `trades` has gone through some changes in the new contracts. `tradeCommits` has been changed to `orderCommits`. It's still indexed by a trader address and contains the transaction hash `hash` and block number `block` for each order committed. `trades` has become `orders` which is indexed by an `order` ID. The two new values added to `orders` are `sharesEscrowed` and `moneyEscrowed` which represent the amount of shares or money held to be used to fulfill bids and asks.
-
 
 ### trades method changes, additions, and removals:
 ```
