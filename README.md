@@ -1149,11 +1149,33 @@ Changed `fillOrder(orderID, fill, money, shares):` was renamed to `fillOrder`. r
 
 ### Data Structure of bidAndAsk Contract:
 ```
-event logAddTx(market:indexed, sender:indexed, type, fxpPrice, fxpAmount, outcome, orderID, moneyEscrowed, sharesEscrowed)
+event logAddTx(
+  market:indexed,
+  sender:indexed,
+  type,
+  fxpPrice,
+  fxpAmount,
+  outcome,
+  orderID,
+  moneyEscrowed,
+  sharesEscrowed
+)
 
-event logCancel(market:indexed, sender:indexed, fxpPrice, fxpAmount, orderID, outcome, type, money, shares)
+event logCancel(
+  market:indexed,
+  sender:indexed,
+  fxpPrice,
+  fxpAmount,
+  orderID,
+  outcome,
+  type,
+  money,
+  shares
+)
 
-event buyAndSellSharesLogReturn(returnValue)
+event buyAndSellSharesLogReturn(
+  returnValue
+)
 ```
 There is no data structures for the `bidAndAsk` contract but there are events defined that are emitted by some of the methods in `bidAndAsk`. It appears that for the most part, what used to be `buy&sellShares.se` has been renamed to `bidAndAsk.se` and some methods have been removed and have been replaced with a more all encompassing `placeOrder` method instead of individual `buy`, `sell`, and `shortAsk` methods.
 
@@ -1188,5 +1210,73 @@ The below are methods that used to exist in `buy&sellShares.se` but don't exist 
 - sell(amount, price, market, outcome, minimumTradeSize, isShortAsk, tradeGroupID):
 ```
 
+## src/functions/cash.se
+
+### Data Structure of cash Contract:
+```
+data accounts[2**160<address>](
+  balance,
+  spenders[2**160<address>](
+    maxValue
+  )
+)
+
+data totalSupply
+
+data name
+
+data symbol
+
+data decimals
+
+event Transfer(
+  from:indexed,
+  to:indexed,
+  value
+)
+
+event Approval(
+  owner:indexed,
+  spender:indexed,
+  value
+)
+```
+The `cash` contract has moved from the `data_api` folder to the `functions` folder. The data structure and events are all completely different then the previous implementation of `cash` currently in master. We have a new data array called `accounts` which is indexed by addresses. Each address will have a `balance` and another array called `spenders` which is also indexed by addresses, in this case an address authorized to spend for you. Inside of the `spenders` array contains a single value, `maxValue` which is the maximum value a `spender` can spend from the owner of the account's balance.
+
+We then have 4 pieces of data: `totalSupply`, 'name', 'symbol', and 'decimals'. `totalSupply` is the total supply of cash in the `Cash` contract. `name` is the name of the currency used in the cash contract which is currently set to `"Cash"` during `init()`. `symbol` is the symbol used as a shorthand for the name, like a $ sign is for US Dollars, currently set to `"CASH"` during `init()`. `decimals` is the number of decimal places used for a unit of REP, currently set to `18` during `init()`.
+
+Two events are also potentially emitted to save logs from this contract, they are `Transfer` and `Approval`. I'll discuss where they are emitted in the method section below.
+
+### cash method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
+
+m:
+balance(address):
+initiateOwner(account):
+send(recver, value):
+sendFrom(recver, value, from):
+subtractCash(ID, amount):
+addCash(ID, amount):
+
+
+d:
+transfer(to: address, value: uint256):
+transferFrom(from: address, to: address, value: uint256):
+approve(spender: address, value: uint256):
+allowance(owner: address, spender: address):
+totalSupply():
+balanceOf(address: address):
+getName():
+getDecimals():
+getSymbol():
+commitSuicide():
