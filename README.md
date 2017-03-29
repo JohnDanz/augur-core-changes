@@ -1256,27 +1256,64 @@ Key : description
 ```
 *Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
 
+```
+! balance(address):
+```
+Renamed `balanceOf(address: address):`.
+
+```
++ transfer(to: address, value: uint256):
+```
+`transfer` is used to transfer a `value` of funds from the `msg.sender`'s account and send it to the address `to`. If the sender doesn't have enough funds or the value sent in is negative, this will fail. Successfully transferring funds will emit a `Transfer` event to save a log of the transfer.
+
+```
++ transferFrom(from: address, to: address, value: uint256):
+```
+`transferFrom` is very similar to `transfer`, the only difference is we explicitly send in a `from` address instead of using `msg.sender` as the account to withdraw from.
+
+```
++ approve(spender: address, value: uint256):
+```
+`approve` has been added to to authorize a `spender` address to spend up to `value` of the `msg.sender`'s account balance.
+
+
+```
++ allowance(owner: address, spender: address):
+```
+`allowance` has been added to check the amount a `spender` address is allowed to spend from a `owner` address' account balance.
+
+```
++ totalSupply():
+```
+`totalSupply` added to return the value of `totalSupply`, which is the total supply of all Ether in this contract.
+
+```
++ getName():
+```
+`getName` added to return the value of `name`, as of now set to `"Cash"` when `init()` is called.
+
+```
++ getDecimals():
+```
+`getDecimals` added to return the value of `decimals`, which is set to `18` during `init()`.
+
+```
++ getSymbol():
+```
+`getSymbol` added to return the value of `symbol`, which is set to `"CASH"` during `init()`.
+
+```
++ commitSuicide():
+```
+`commitSuicide` will delete and remove the contract from the blockchain and return all ether in this contract to the `msg.sender`. `msg.sender` must be equal to the suicide address or this will fail.
+
+```
+- initiateOwner(account):
+- send(recver, value):
+- sendFrom(recver, value, from):
+- addCash(ID, amount):
+- subtractCash(ID, amount):
+```
 
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
-
-m:
-balance(address):
-initiateOwner(account):
-send(recver, value):
-sendFrom(recver, value, from):
-subtractCash(ID, amount):
-addCash(ID, amount):
-
-
-d:
-transfer(to: address, value: uint256):
-transferFrom(from: address, to: address, value: uint256):
-approve(spender: address, value: uint256):
-allowance(owner: address, spender: address):
-totalSupply():
-balanceOf(address: address):
-getName():
-getDecimals():
-getSymbol():
-commitSuicide():
