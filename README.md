@@ -1315,5 +1315,18 @@ Renamed `balanceOf(address: address):`.
 - subtractCash(ID, amount):
 ```
 
+## src/functions/claimProceeds.se
+
+### Data Structure of cash Contract:
+
+There is no data structure for this contract.
+
+### claimProceeds method:
+
+```
+claimProceeds(market):
+```
+`claimProceeds` is used to claim the trading profits per share after a `market` is resolved. If the `market` is not resolved this will fail.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
