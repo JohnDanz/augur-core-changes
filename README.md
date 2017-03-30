@@ -1386,5 +1386,38 @@ Changed to `collectFees(branch, sender, currency):`. In addition to needing a `b
 ```
 `collectRep` was added to collect the REP at the end of a period. It requires a `branch` and `sender`. Possible return values are `1`, for success, `0` for fees already collected, `-1` for penalization not done, `-2` if we aren't in the 2nd half of reporting period, and `2` if there was no error but the sender didn't report last period.
 
+## src/functions/completeSets.se
+
+### Data Structure of completeSets Contract:
+```
+event completeSetsLogReturn(
+  sender: indexed,
+  market: indexed,
+  type: indexed,
+  returnValue,
+  numOutcomes
+)
+```
+`completeSets` has no data structure of it's own. It does however have an event, `completeSetsLogReturn` which creates a log with information about the `sender`, `market`, `type` of trade, the `returnValue`, and the number of outcomes bought or sold `numOutcomes`.
+
+### completeSets method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! buyCompleteSets(market, amount):
+```
+Changed to `buyCompleteSets(market, fxpAmount):`. `amount` has been changed to `fxpAmount` to indicate this is a fixed point value. `buyCompleteSets` is used to buy the `fxpAmount` of shares for each outcome in a `market`. Successfully handling a `buyCompleteSets` will emit a `completeSetsLogReturn` event which creates a log of the transaction. The returnValues are `1` if successful, `0` if the market doesn't exist. `-1` is returned if this is a oracle only branch and therefor trading is disabled. `-2` is returned if the sender doesn't have enough money and `-3` is returned if the sender didn't enter a large enough `fxpAmount`, like if `fxpAmount` was less than or equal to `0`.
+
+```
+! sellCompleteSets(market, amount):
+```
+Changed to `sellCompleteSets(market, fxpAmount):`. Like `buyCompleteSets`, we have renamed the `amount` param to `fxpAmount` to indicate this is a fixed point value. `sellCompleteSets` is used to sell the `fxpAmount` of shares for each outcome in a `market` assuming that we own a position on each outcome less than or equal to the `fxpAmount`. Successfully handling a `sellCompleteSets` will emit a `completeSetsLogReturn` event which creates a log of the transaction. The returnValues are `1` if successful, `-1` if the user doesn't have enough shares to sell, and `-2` if the user entered too small of a `fxpAmount` value. An example of too small of a `fxpAmount` would be a number less than or equal to `0`.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
