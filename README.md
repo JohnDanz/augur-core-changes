@@ -1317,16 +1317,50 @@ Renamed `balanceOf(address: address):`.
 
 ## src/functions/claimProceeds.se
 
-### Data Structure of cash Contract:
+### Data Structure of claimProceeds Contract:
 
-There is no data structure for this contract.
+There is no data structure for the `claimProceeds` contract.
 
 ### claimProceeds method:
 
 ```
-claimProceeds(market):
++ claimProceeds(market):
 ```
 `claimProceeds` is used to claim the trading profits per share after a `market` is resolved. If the `market` is not resolved this will fail.
+
+
+## src/functions/closeMarket.se
+
+### Data Structure of closeMarket Contract:
+```
+event closeMarketLogReturn(
+  returnValue
+)
+```
+`closeMarket` has changed a bit from it's current iteration in master. It used to contain a `closeMarket` event, and a `closeMarket_logReturn` event, however `closeMarket` is no longer an event and `closeMarket_logReturn` has been renamed to `closeMarketLogReturn`.
+
+### closeMarket method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! closeMarket(branch, market, sender):
+```
+Changed `closeMarket(market, sender):` to no longer require a `branch` param. `closeMarket` is still used to get winning outcomes of events related to a `market` and then resolves the `market` using the winning outcomes of the events.
+
+```
++ closeChallengeBond(event):
+```
+`closeChallengeBond` was added to close out a challenge bond for a specific `event`. If the event is not challenged this will fail. If the event is found to have the same outcome then the bond is lost, if the event is found to have a different outcome then the bond is returned + half of the validity bond is added as payment for a successful challenge.  
+
+```
+- claimProceeds(branch, market):
+```
 
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
