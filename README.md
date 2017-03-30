@@ -1362,5 +1362,29 @@ Changed `closeMarket(market, sender):` to no longer require a `branch` param. `c
 - claimProceeds(branch, market):
 ```
 
+## src/functions/collectFees.se
+
+### Data Structure of collectFees Contract:
+`collectFees` has no data structure of it's own. It also no longer has an event called `collectedFees` defined.
+
+### collectFees method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! collectFees(branch, sender):
+```
+Changed to `collectFees(branch, sender, currency):`. In addition to needing a `branch` and `sender` to collect fees for, we also now need to indicate which `currency` we would like to collect. This transfers the fees from the `branch` wallet for the specific `currency` to the `sender`. Possible return values are `1`, for success, `0` for fees already collected, `-1` for penalization not done, `-2` if we aren't in the 2nd half of reporting period, `-3` if rep hasn't been collected yet, and `2` if there was no error but the sender didn't report last period.
+
+```
++ collectRep(branch, sender):
+```
+`collectRep` was added to collect the REP at the end of a period. It requires a `branch` and `sender`. Possible return values are `1`, for success, `0` for fees already collected, `-1` for penalization not done, `-2` if we aren't in the 2nd half of reporting period, and `2` if there was no error but the sender didn't report last period.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
