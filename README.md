@@ -1448,5 +1448,32 @@ There is no data structure in the consensus contract but there are two events. O
 
 Both `penalizeWrong(branch, event):` and `incrementPeriodAfterReporting(branch):` are unchanged and remain the only exposed methods in the consensus contract. The `penalizeWrong` method is the only method that emits events to create logs.
 
+## src/functions/createBranch.se
+
+### Data Structure of createBranch Contract:
+```
+data ethContract
+```
+The only data structure in `createBranch` is the `ethContract` address. This is set during `init()` and should be set to the `ETH` sub currency contract address.
+
+### createBranch method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! createSubbranch(description:str, periodLength, parent, minTradingFee, oracleOnly):
+```
+Changed to `createSubbranch(description:str, periodLength, parent, fxpMinTradingFee, oracleOnly, mostRecentChildBranch):`. `minTradingFee` has become `fxpMinTradingFee` in order to indicate this is a fixed point value. `mostRecentChildBranch` has been added as a param and is expected to be the most recent child branch address, or 0 for user created branches. This function returns the branch ID created as it's return value if it's successful. Possible errors are `-1` for bad input or non existent parent branch, `-2` is thrown if the branch already exists.
+
+```
++ init():
+```
+`init` sets the `ethContract` to the `ETH` sub currency address.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
