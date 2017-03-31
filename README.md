@@ -1543,5 +1543,25 @@ Changed to `updateTradingFee(market, fxpTradingFee):`. `updateTradingFee` has dr
 - createSingleEventMarket(branch, description:str, expDate, minValue, maxValue, numOutcomes, resolution:str, tradingFee, tag1, tag2, tag3, makerFees, extraInfo:str):
 ```
 
+## src/functions/eventResolution.se
+
+### Data Structure of eventResolution Contract:
+
+`eventResolution` doesn't have a data structure or events of it's own.
+
+### eventResolution method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! resolveCategoricalOrScalar(scaled_min, scaled_max, event, market, branch, votingPeriodEvent):
+```
+Changed to `resolveCategoricalOrScalar(fxpScaledMin, fxpScaledMax, event, market, branch, votingPeriodEvent):`. In the develop version of `resolveCategoricalOrScalar` the params `scaled_min` and `scaled_max` have been renamed to `fxpScaledMin` and `fxpScaledMax` to indicate these should be fixed point values.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
