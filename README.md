@@ -1475,5 +1475,73 @@ Changed to `createSubbranch(description:str, periodLength, parent, fxpMinTrading
 ```
 `init` sets the `ethContract` to the `ETH` sub currency address.
 
+## src/functions/createMarket.se
+
+### Data Structure of createMarket Contract:
+```
+event marketCreated(
+  market
+)
+
+event tradingFeeUpdated(
+  market,
+  fxpTradingFee
+)
+```
+The `createMarket` contract has no data structure but keeps it's two event logs that exist in master, `marketCreated` and `tradingFeeUpdated`. Both events have been simplified to include less data in the log that is written when they are triggered. For `createMarket` we only are storing the `marketID` in the log created when previously we would record the `sender`, the `marketID`, the `topic`, the `branch`, the `creationFee`, the `eventBond`, and the creation `timestamp`. `tradingFeeUpdated` has also lost a few values it used to record such as `sender`, `branch`, and `timestamp`. `tradingFee` has been changed to `fxpTradingFee` to indicate this is a fixed point value. `marketID` is now simply `market`.
+
+
+### createMarket method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! createEvent(branch, description:str, expDate, minValue, maxValue, numOutcomes, resolution: str):
+```
+Changed to `createEvent(branch, description:str, expDate, fxpMinValue, fxpMaxValue, numOutcomes, resolution: str, resolutionAddress, currency, forkResolveAddress):`. `createEvent` has a couple of renamed params, `minValue` and `maxValue` became `fxpMinValue` and `fxpMaxValue` to indicate they are fixed point values. We have also added a few more fields, `resolutionAddress`, `currency`, and `forkResolveAddress`. `resolutionAddress` is the address of a specific person set to resolve the market, otherwise this field should be `0` if we plan to use random reporters. `currency` is the contract address for the erc20 token we plan to use for the new event. `forkResolveAddress` is the address of a contract that this newly created even should use to fork. If we want to use the regular forking process then this should be `0`.
+
+Possible errors include: `0` for not enough money to pay fees or the `event` already exists. `-1` if we are pasted the `expDate` passed, the `branch` doesn't exist, `description` is bad or the `resolutionAddress` is bad. `-2` if the max value is less than the min value or the market range is less than 1. `-3` if passed an invalid number of outcomes (<2 or >8). `-4` if an `event` would be created that would expire in the last 48 hours of the current `period`. `-5` if the `currency` isn't an approved `branch` currency.
+
+```
+! createMarket(branch, tradingFee, event, tag1, tag2, tag3, makerFees, extraInfo:str):
+```
+Changed to `createMarket(branch, description: str, fxpTradingFee, event, tag1, tag2, tag3, extraInfo: str, currency):`. `createMarket` has had `tradingFee` renamed to `fxpTradingFee` to indicate this is a fixed point value. `makerFees` has been removed. `description` has been added and should be the market question. `currency` was also added and is the erc20 token address of the currency we plan to allow to be used for trading on this market. `createMarket` will write a `marketCreated` log with the market ID as it's `market` value.
+
+Possible errors include: `-1` for bad input or a non existent `event`. `-2` if the `event` has already expired. `-4` if the `market` already exists. `-5` if the currency isn't an approved branch currency. `-6` if there isn't enough money for the market resolution gas cost. It will throw if there isn't enough money to create the market and place the event in the appropriate reporting period.
+
+```
+! updateTradingFee(branch, market, tradingFee, makerFees):
+```
+Changed to `updateTradingFee(market, fxpTradingFee):`. `updateTradingFee` has dropped the `branch` and `makerFees` as params and updated `tradingFee` to `fxpTradingFee` to indicate this is a fixed point value. `updateTradingFee` will write a `tradingFeeUpdated` log if it's successful with the `marketID` and the new `fxpTradingFee` as it's entries. Possible errors are `-1` if the msg.sender isn't the market creator and `-2` if `fxpTradingFee` is invalid because it is too large or too small.
+
+```
++ putEventIntoReportingPeriod(event):
+```
+`putEventIntoReportingPeriod` is used to add an event to the soonest regular reporting cycle for events that have a defined `resolutionAddress` but that address didn't resolve the `event` within 3 days of expiration. This is used to fall back to regular reporting.
+
+```
++ challengeInitialResolution(event):
+```
+`challengeInitialResolution` has been added as a way to challenge the result of an `event` resolved by a `resolutionAddress` within 3 days of the resolution. This method will move the event to the soonest possible reporting period in order to be reported on by the regular reporting cycle. This also triggers the payment of the extraBond.
+
+```
++ resolveEarly(event, outcome):
+```
+`resolveEarly` was added to resolve an `event` before the scheduled expiration of the `event`. The `event` will be set to whatever `outcome` is passed. This must be called by the `resolutionAddress` or else it will fail.
+
+```
++ addFees(market, fxpAmount):
+```
+`addFees` is used to add more fees, `fxpAmount`, to a `market`. This is done to effectively help pay for oracle usage directly without having to trade using default contracts.
+
+```
+- createSingleEventMarket(branch, description:str, expDate, minValue, maxValue, numOutcomes, resolution:str, tradingFee, tag1, tag2, tag3, makerFees, extraInfo:str):
+```
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
