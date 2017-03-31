@@ -29,11 +29,12 @@ src/data_api/
   * register.se
   * reporting.se
   + reportingThreshold.se
-  - topics.se
-  * trades.se
+  * topics.se
+  - trades.se (became orders.se)
+  + orders.se (was trades.se)
 src/functions/
-  - buy&sellShares.se
-  + bidAndAsk.se
+  - buy&sellShares.se (became bidAndAsk.se)
+  + bidAndAsk.se (was buy&sellShares.se)
   -> cash.se
   + claimMarketProceeds.se
   * closeMarket.se
@@ -1050,9 +1051,9 @@ findLazyReportersAndLeechers(branch, votePeriod, reporterStart, reporterEnd, eve
 ```
 `findLazyReportersAndLeechers` is used to penalize people who had at least 1 REP active but didn't report on the minimum number of reports. It loops through the list of active reporters, given a range from `reporterStart` to `reporterEnd` for a specific `branch` and `votePeriod`. It checks reporters minimum number of events to report on given a range from `eventStart` to `eventEnd`. Both `reporterEnd` and `eventEnd` will default to the total number of reporters or events respectively if they are passed as 0. If the reporters have reported on less than the minimum we find an example of an event they could have reported on but didn't and then return two arrays, one with address of reporters who need to be penalized and another of the example event addresses they could have reported on.
 
-## src/data_api/trades.se
+## src/data_api/orders.se
 
-### Data Structure of trades Contract:
+### Data Structure of orders Contract:
 ```
 data orderCommits[<address>](
   hash,
@@ -1072,9 +1073,9 @@ data orders[<order>](
   moneyEscrowed
 )
 ```
-`trades` has gone through some changes in the new contracts. `tradeCommits` has been changed to `orderCommits`. It's still indexed by a trader address and contains the transaction hash `hash` and block number `block` for each order committed. `trades` has become `orders` which is indexed by an `order` ID. The two new values added to `orders` are `sharesEscrowed` and `moneyEscrowed` which represent the amount of shares or money held to be used to fulfill bids and asks.
+`trades.se` has become `orders.se` and gone through some changes in the new contracts. `tradeCommits` has been changed to `orderCommits`. It's still indexed by a trader address and contains the transaction hash `hash` and block number `block` for each order committed. `trades` has become `orders` which is indexed by an `order` ID. The two new values added to `orders` are `sharesEscrowed` and `moneyEscrowed` which represent the amount of shares or money held to be used to fulfill bids and asks.
 
-### trades method changes, additions, and removals:
+### orders method changes, additions, and removals:
 ```
 Key : description
 !   : Modified method
@@ -1144,6 +1145,10 @@ Changed `fillOrder(orderID, fill, money, shares):` was renamed to `fillOrder`. r
 
 - getSender():
 ```
+
+## src/data_api/topics.se
+
+`Topics` actually hasn't changed at all between the current version of master and develop, I just included it here to make it clear I didn't forget to inspect `topics`, but that it just hasn't changed.
 
 ## src/functions/bidAndAsk.se
 
@@ -1418,6 +1423,30 @@ Changed to `buyCompleteSets(market, fxpAmount):`. `amount` has been changed to `
 ! sellCompleteSets(market, amount):
 ```
 Changed to `sellCompleteSets(market, fxpAmount):`. Like `buyCompleteSets`, we have renamed the `amount` param to `fxpAmount` to indicate this is a fixed point value. `sellCompleteSets` is used to sell the `fxpAmount` of shares for each outcome in a `market` assuming that we own a position on each outcome less than or equal to the `fxpAmount`. Successfully handling a `sellCompleteSets` will emit a `completeSetsLogReturn` event which creates a log of the transaction. The returnValues are `1` if successful, `-1` if the user doesn't have enough shares to sell, and `-2` if the user entered too small of a `fxpAmount` value. An example of too small of a `fxpAmount` would be a number less than or equal to `0`.
+
+## src/functions/consensus.se
+
+### Data Structure of consensus Contract:
+```
+event penalize(
+  user:indexed,
+  outcome,
+  oldrep,
+  repchange,
+  newafterrep,
+  p,
+  reportValue
+)
+event consensusLogReturn(
+  returnValue
+)
+```
+
+There is no data structure in the consensus contract but there are two events. One of them is `consensusLogReturn` which simply contains a `returnValue` and is unchanged from it's master iteration aside from a name change from `consensus_logReturn` to `consensusLogReturn`. `penalize` keeps its name the same but it's params have changed. Instead of sender, we have `user` which is set to the `msg.sender`. We no longer record a `branch`, `event`, `penalizedUpTo`, or `timestamp`. `outcome`, `oldrep` which is just the `beforeRep` value for `msg.sender`, `repchange`, `p` (proportionCorrect), and `reportValue` are all still recorded as before. `newafterrep` has been added and is the `afterRep` value for the `msg.sender`.  
+
+### consensus method changes, additions, and removals:
+
+Both `penalizeWrong(branch, event):` and `incrementPeriodAfterReporting(branch):` are unchanged and remain the only exposed methods in the consensus contract. The `penalizeWrong` method is the only method that emits events to create logs.
 
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
