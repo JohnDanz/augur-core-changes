@@ -1563,5 +1563,36 @@ Key : description
 ```
 Changed to `resolveCategoricalOrScalar(fxpScaledMin, fxpScaledMax, event, market, branch, votingPeriodEvent):`. In the develop version of `resolveCategoricalOrScalar` the params `scaled_min` and `scaled_max` have been renamed to `fxpScaledMin` and `fxpScaledMax` to indicate these should be fixed point values.
 
+## src/functions/faucets.se
+
+Faucets is unchanged.
+
+
+## src/functions/forking.se
+
+### Data Structure of forking Contract:
+
+`forking` doesn't have a data structure of it's own.
+
+### forking method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! move_event(event):
+```
+Renamed to `moveEvent(event):`.
+
+```
+! resolve_fork(branch):
+```
+Renamed to `resolveFork(branch):`.
+
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
