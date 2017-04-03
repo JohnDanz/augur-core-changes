@@ -1593,6 +1593,63 @@ Renamed to `moveEvent(event):`.
 ```
 Renamed to `resolveFork(branch):`.
 
+## src/functions/forkPenalize.se
+
+### Data Structure of forkPenalize Contract:
+
+`forkPenalize` doesn't have a data structure of it's own.
+
+### forkPenalize method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+- proportionCorrectForkEvent(event):
+```
+
+## src/functions/makeReports.se
+
+### Data Structure of makeReports Contract:
+```
+event makeReportsLogReturn(
+  returnValue
+)
+```
+The `makeReports` contract doesn't have a data structure and now only contains one event for writing a log: `makeReportsLogReturn`. `makeReportsLogReturn` has been renamed from the old event `makeReports_logReturn`. `submittedReportHash` and `submittedReport` events have been removed from this contract.
+
+### makeReports method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! makeHash(salt, report, eventID, sender):
+```
+Changed to `makeHash(salt, fxpReport, event, sender, ethics):`. `report` has been renamed to `fxpReport` to indicate this is a fixed point value. `eventID` has been renamed to simply `event`. `ethics` has been added to the hash.
+
+```
+! submitReportHash(event, reportHash, encryptedReport, encryptedSalt, ethics):
+```
+Changed to `submitReportHash(event, reportHash, saltyEncryptedHash):`. Now to submit a report hash we only need to pass `event`, `reportHash`, and the `saltyEncryptedHash`. `setSaltyEncryptedHash` is the result of `makeHash`.
+
+```
+! submitReport(event, salt, report, ethics):
+```
+Changed to `submitReport(event, salt, fxpReport, fxpEthics):`. The params `report` and `ethics` have been renamed to `fxpReport` and `fxpEthics`. This was done to indicate they should be fixed point values.
+
+```
+! validateReport(eventID, branch, votePeriod, report, forkedOverEthicality, forkedOverThisEvent, roundTwo, balance):
+```
+Changed to `validateReport(event, branch, votePeriod, fxpReport, forkedOverEthicality, forkedOverThisEvent, weight):`. `eventID` has been renamed to just `event`. `roundTwo` and `balance` have been removed from the arguments. `weight` has been added as an input which is set to `1` in the `submitReport` function.
 
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
