@@ -1651,5 +1651,80 @@ Changed to `submitReport(event, salt, fxpReport, fxpEthics):`. The params `repor
 ```
 Changed to `validateReport(event, branch, votePeriod, fxpReport, forkedOverEthicality, forkedOverThisEvent, weight):`. `eventID` has been renamed to just `event`. `roundTwo` and `balance` have been removed from the arguments. `weight` has been added as an input which is set to `1` in the `submitReport` function.
 
+## src/functions/offChainTrades.se
+
+### Data Structure of offChainTrades Contract:
+```
+event Order(
+  tokenX:address:indexed,
+  orderSize,
+  tokenY:address:indexed,
+  fxpPrice,
+  expiration,
+  user:address:indexed
+)
+
+event Cancel(
+  tokenX:address:indexed,
+  orderSize,
+  tokenY:address:indexed,
+  fxpPrice,
+  expiration,
+  user:address:indexed,
+  v,
+  r,
+  s
+)
+
+event Trade(
+  maker:address:indexed,
+  taker:address,
+  tokenX:address:indexed,
+  tokenY:address:indexed,
+  amount,
+  fxpPrice,
+  tradeHash
+)
+
+data amountFilled[<orderHash>]
+```
+
+`offChainTrades.se` has been added to the contracts in `develop`. It has three events and one data structure. `amountFilled` is indexed by the `orderHash` of an off chain order. It contains the amount of shares an order has filled so far. `Order` is an event that writes a log whenever `onChainOrder` is called successfully. It's used to store a record of an off chain order being placed. It stores the address of the token we plan to sell as `tokenY`. The amount of `tokenY` to sell is defined as `orderSize`. The address for the token we plan to buy is `tokenX`. The exchange rate of `tokenY` for each `tokenX` is defined by `fxpPrice`. The `expiration` for the order and the `user` who placed the order are also recorded.
+
+`Cancel` is called when an order is successfully canceled by the `user` who posted the order. `Cancel` records the `tokenY` address, the amount of `tokenY` as `orderSize`, the address for the `tokenX` accepted for `tokenY` and the rate of exchange (`fxpPrice`) one `tokenX` is worth to `tokenY`. It also records `expiration` of the order and the `user` who posted the order originally. This is all similar to `Order` however `Cancel` also requires the `v`, `r`, and `s` fields of the `user` who placed the order in order to verify that the order was sent by `user`.
+
+`Trade` is called when part or all of an order has been filled successfully. Trade records the `maker` address of the person who placed the order, the `taker` address of the person who wants to fill the order, the token address (`tokenX`) used by the `taker` to fill the order, the token address (`tokenY`) of the `maker`'s order to be filled, the `amount` to fill, the rate (`fxpPrice`) at which to fill `tokenY` for each `tokenX`, and the `tradeHash`.
+
+### offChainTrades method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
++ trade(maker: address, v, r, s, tokenX: address, tokenY: address, orderSize, takerAmount, fxpPrice, expiration):
+```
+`trade` is called to attempt to fill some or all of an order. It takes a `maker` address, which is the person who placed the order on the book. It takes the `v, r, s` values in order to verify the `orderHash` was signed by `maker`. It also requires details about the order such as `tokenX` (token to be bought), `tokenY` (token to be sold), orderSize which indicates the amount of `tokenY` available in the order, the `fxpPrice` exchange rate of `tokenY` to each `tokenX` and the `expiration` of the order. `takerAmount` is the amount of token Y we intend to fill of the order. This will record a `Trade` log if successful and return `1`.
+
+Possible errors are: `0` if the orderHash can't be verified. `-1` if the order has expired. `-2` if the `maker` or `taker` doesn't have enough money or isn't authorized to spend enough money to fill the request. `-3` if the `takerAmount` exceeds the amount left available on the order.
+
+```
++ onChainOrder(tokenX: address, orderSize, tokenY: address, fxpPrice, expiration):
+```
+`onChainOrder` is called to generate an `Order` log and returns the `orderHash` for the order placed. It requires a `tokenX` to be accepted as payment, the amount of `tokenY` to sell as `orderSize`, the `tokenY` we plan to sell, the rate at which we will sell `tokenY` for one `tokenX` as `fxpPrice` and the `expiration` of this order.
+
+```
++ cancelOrder(tokenX: address, orderSize, tokenY: address, fxpPrice, expiration, v, r, s):
+```
+`cancelOrder` is used to do exactly that. After placing an order, if the user who placed the order has decided to cancel the order and remove it from the order book before it's been filled then they would call this method. `cancelOrder` requires the `tokenX` we planned to accept, the amount of `tokenY` we plan to remove from the order book as `orderSize`, the `tokenY` we had planned to sell, the rate at which we would have exchanged `tokenY` for one `tokenX` as `fxpPrice`, and the `expiration` of the order. We are also required to pass the `v, r, s` values in order to confirm that the `msg.sender` of this request is the user who placed the order on the book. If successful in canceling the order, a `Cancel` log will be written to record the cancelation and a `1` will be returned. This will throw an error if the `msg.sender` isn't the person who created the order.
+
+```
++ getAmountFilled(orderHash):
+```
+`getAmountFilled` returns the amount of an order already filled given an `orderHash`. If none of the order has been filled this will return `0`.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
