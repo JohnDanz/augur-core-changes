@@ -1990,5 +1990,26 @@ Key : description
 ```
 `modifySupply` is used to add or subtract from the total supply of shares by a given `amount`. `amount` should be negative to subtract shares, positive to increase shares. This function is to be whitelisted.
 
+## src/functions/slashRep.se
+
+### Data Structure of slashRep Contract:
+`slashRep` has no data structure or events of it's own.
+
+### slashRep method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! slashRep(branch, salt, report, reporter, eventID):
+```
+Changed to `slashRep(branch, salt, report, ethics, reporter, event):`. The params have changed with the new slashRep in development, now in addition to the previous params we require the `ethics` of the event. Also the param `eventID` has been renamed to just `event`. This will return 1 if successful and the `reporter` will have lost their `REP` balance, with half going to the `msg.sender` of the `slashRep` method and the other half going to the `branch`.
+
+Possible errors include: `-1` if it's an invalid votePeriod, `-2` if we are past the date of reveal, `-3` for invalid claims or `reportHash`, users should make sure that the colluding `reporter`'s commit is the same as the params passed to `slashRep`, `-4` if the event isn't in the branch specified, and `-5` if already slashed.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
