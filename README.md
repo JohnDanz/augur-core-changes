@@ -1746,5 +1746,142 @@ Key : description
 ```
 `oneOutcome` is used to payout a market with only one winning outcome, like a binary market as an example. It requires a market ID `market`, the winning outcome value `winningOutcome`, the `sender` address who will be getting the payout, `categoricalPointFive` which is a boolean to indicate if this is an indeterminate categorical market in which all outcomes should get a payout evenly, and finally the number of outcomes `numOutcomes`. Returns `1` if successful.
 
+## src/functions/penalizationCatchup.se
+
+### Data Structure of penalizationCatchup Contract:
+
+`penalizationCatchup` has no data structure and no events are defined in the contract. The `penalizationCaughtUp` event is no longer a part of this contract and no such log is written when calling `penalizationCatchup`.
+
+### penalizationCatchup method changes, additions, and removals:
+
+```
+penalizationCatchup(branch, sender):
+```
+`penalizationCatchup` is the only function callable in this contract. It hasn't changed it's signature from the master incarnation.
+
+## src/functions/penalizeNotEnoughReports.se
+
+### Data Structure of penalizeNotEnoughReports Contract:
+
+`penalizeNotEnoughReports` has no data structure and no events are defined in the contract.
+
+### penalizeNotEnoughReports method changes, additions, and removals:
+
+```
+proveReporterDidntReportEnough(branch, reporter, eventExample):
+```
+`proveReporterDidntReportEnough`'s signature is unchanged and still takes a `branch`, `reporter` address, and event ID `eventExample` to check and penalize a `reporter` if they haven't reported enough. This will return 1 if successful. Possible errors include: `0` if the branch or `eventExample` doesn't exist, `-1` if penalization for not reporting is already complete, `-2` if this is called but we aren't in the correct part of the period, `-3` if the `eventExample` isn't in the `branch`, and `-5` if the `reporter` has reported enough and doesn't need to be penalized.
+
+## src/functions/roundTwo.se
+
+### Data Structure of roundTwo Contract:
+
+`roundTwo` has no data structure and no events are defined in the contract.
+
+### roundTwo method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! roundTwoPostBond(branch, event, eventIndex, votePeriod):
+```
+Changed to `roundTwoPostBond(branch, event, eventIndex, overEthicality):`. We still need `branch`, `event`, and `eventIndex` but instead of `votePeriod` we now require `overEthicality`. `overEthicality` is a boolean indicating wether the the bond is being posted in order to dispute an `event` over it's ethics or not. This function will return `1` if successful. Will throw if `msg.value` is not enough to cover the cost of the resolution or the bond isn't large enough. Possible errors include: `0` for an invalid branch or period, `-1` if the event was pushed forward in which case posting a bond isn't allowed during the event being moved, `-2` if the branch is in middle of a fork, `-3` if there is not enough money in `msg.value`, `-4` if the `event` has no votes.
+
+## src/functions/roundTwoPenalize.se
+
+### Data Structure of roundTwoPenalize Contract:
+
+`roundTwoPenalize` has no data structure and no events are defined in the contract.
+
+### roundTwoPenalize method changes, additions, and removals:
+
+```
+penalizeRoundTwoWrong(branch, event):
+```
+`penalizeRoundTwoWrong` is the only function callable in this contract. It's signature is unchanged.
+
+## src/functions/sendReputation.se
+
+### Data Structure of sendReputation Contract:
+```
+data amountCanSpend[<address(owner)>][<address(spender)>](
+  branch[<branch>]
+)
+
+event Transfer(
+  from:indexed,
+  to:indexed,
+  value
+)
+
+event Approval(
+  owner:indexed,
+  spender:indexed,
+  branch:indexed,
+  value
+)
+```
+`sendReputation` has one data structure defined and two events defined which have had renamed params. `amountCanSpend` is a multi-dimensional array indexed by the address of an `owner` of an account and the address of the approved `spender` for that owned account. Inside is a `branch` array indexed by a branch ID with fixed point values for the amount of dormant `REP` an approved `spender` is allowed to withdraw from the `owner`'s account.
+
+The `Transfer` event writes a `Transfer` log whenever a successful call to `sendRepFrom` or `transferFrom` is executed. The `Transfer` log stores the `from` address for a transfer of `REP`, the `to` address, and the `value` amount of `REP` which should be fixed point.
+
+The `Approval` event writes an `Approval` log whenever a successful call to `approve` is executed. The `Approve` log stores information about which `owner` account approved which `spender` account to withdraw an `value` amount of dormant `REP` from their account on a specific `branch`.
+
+### sendReputation method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! transferFrom(branch, from, recver, value):
+```
+Changed to `transferFrom(branch, from, receiver, fxpValue):`. The only real change here is the renamed params: `recver` became `receiver` and `value` has become `fxpValue` to help indicate this should be a fixed point value.
+
+```
+! approve(branch, spender, value):
+```
+Changed to `approve(branch, spender, fxpValue):`. The only change is the `value` param has become `fxpValue` to indicate it should be a fixed point value.
+
+```
+! allowance(owner, spender):
+```
+Changed to `allowance(branch, owner, spender):`. This function now takes a `branch` param in addition to the `owner` and `sender`.
+
+```
+! convertToDormantRep(branch, value):
+```
+Changed to `convertToDormantRep(branch, fxpValue):`. The `value` param has been renamed to `fxpValue` to indicate this is a fixed point value.
+
+```
+! convertToActiveRep(branch, value):
+```
+Changed to `convertToActiveRep(branch, fxpValue):`. The `value` param has been renamed to `fxpValue` to indicate this is a fixed point value.
+
+```
++ claimRep():
+```
+`claimRep` is used to claim a `msg.sender`'s `REP` and add them to the reporting pool.
+
+```
++ sendRepFrom(branch, from, receiver, fxpValue):
+```
+`sendRepFrom` is used to send a fixed point amount (`fxpValue`) of active `REP` from one address (`from`) to another address (`receiver`) on a certain `branch`.
+Returns the `fxpValue` of sent `REP` if successful. Possible errors include: `0` if we are one period behind and need to do penalization, `-1` the `from` account doesn't have any rep, `-2` wrong part of period, `-3` the `to` address doesn't exist, `-4` is couldn't catch up automatically, `-5` not enough rep, fxpValue is too small, or not authorized to send `REP`. Finally we have `-6` if a person reported on a round 2 event before it was in the second round [i.e. the first reporting backstop], they cannot convert their rep to dormant or send rep until they've finished the resolution process for that round 2 event.
+
+```
+- sendReputation(branch, recver, value):
+
+- transfer(branch, recver, value):
+```
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
