@@ -1883,5 +1883,112 @@ Returns the `fxpValue` of sent `REP` if successful. Possible errors include: `0`
 - transfer(branch, recver, value):
 ```
 
+## src/functions/shareTokens.se
+
+### Data Structure of shareTokens Contract:
+```
+data accounts[2**160<address>](
+  balance,
+  spenders[2**160<address>](
+    maxValue
+  )
+)
+
+data totalSupply
+
+data name
+
+data symbol
+
+data decimals
+
+event Transfer(
+  from:indexed,
+  to:indexed,
+  value
+)
+
+event Approval(
+  owner:indexed,
+  spender:indexed,
+  value
+)
+```
+The `shareTokens` contract is a erc20 token wrapper for shares. There are five data structures and two events defined in the `shareTokens` contract. Four of the data structures are simple and self explanitory, they are `totalSupply`, `name`, `symbol`, and `decimals`. `totalSupply` is the total supply of shares in the contract, `name` is the name of the token, which is `"Shares"` by default, the symbol is set to `"SHARE"` and the `decimals` is the amount of decimal places each Share has, in this case `18`. There is also an `accounts` array indexed by account addresses. Within the `accounts` array is a `balance` of shares for that account, and an array of authorized `spenders` indexed by account addresses. Inside of the `spenders` array is the maximum value (`maxValue`) of how much a spender is authorized to withdraw from the owner of the account.
+
+The `Transfer` event creates a `Transfer` log whenever a successful call to `transfer` or `transferFrom` is made. It records the person who sent the shares ('from'), the person who recieved the shares ('to'), and the amount of shares sent ('value').
+
+The `Approval` event creates an `Approval` log whenever a successful call to `approve` is made. `Approval` records the `owner` of the account, the person authorized to spend (`spender`), and the amount they are authorized to spend (`value`).
+
+
+### shareTokens method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
++ init():
+```
+`Init` sets the `name`, `symbol`, and `decimals` data structures to `"Shares"`, `"SHARE"`, and `18` respectively.
+
+```
++ transfer(to: address, value: uint256):
+```
+`transfer` will transfer an amount (`value`) of shares from the `msg.sender`'s account to the `to` address specified. This will throw if there is not enough shares to send, the `value` is less than 0, or the `to` address doesn't exist.
+
+```
++ transferFrom(from: address, to: address, value: uint256):
+```
+`transferFrom` is similar to `transfer` except that we must specify the `from` address instead of using the `msg.sender` address. It can fail for the same reasons as `transfer` as well as if the `from` address doesn't exist.
+
+```
++ approve(spender: address, value: uint256):
+```
+`approve` is used to authorize a `spender` address to withdraw up to a specific `value` of shares of a `msg.sender`'s account.
+
+```
++ allowance(owner: address, spender: address):
+```
+`allowance` is used to check how many shares a `spender` is authorized to withdraw from a specific `owner`.
+
+```
++ totalSupply():
+```
+`totalSupply` returns the value of the `totalSupply` data structure, which is the number of shares total.
+
+```
++ balanceOf(address: address):
+```
+`balanceOf` is used to get the amount of shares owned by a specific `address`.
+
+```
++ getName():
+```
+`getName` returns the value of the `name` data structure, which is defaulted to `"Shares"`.
+
+```
++ getDecimals():
+```
+`getDecimals` returns the value of the `decimals` data structure, which is defaulted to `18`.
+
+```
++ getSymbol():
+```
+`getSymbol` returns the value of the `symbol` data structure, which is defaulted to `"SHARE"`.
+
+```
++ changeTokens(trader, amount):
+```
+`changeTokens` is used to add an `amount` of tokens to the balance of a `trader` assuming that their current balance + `amount` isn't less than 0. This function is to be whitelisted.
+
+```
++ modifySupply(amount):
+```
+`modifySupply` is used to add or subtract from the total supply of shares by a given `amount`. `amount` should be negative to subtract shares, positive to increase shares. This function is to be whitelisted.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
