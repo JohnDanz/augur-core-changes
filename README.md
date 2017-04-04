@@ -1726,5 +1726,25 @@ Possible errors are: `0` if the orderHash can't be verified. `-1` if the order h
 ```
 `getAmountFilled` returns the amount of an order already filled given an `orderHash`. If none of the order has been filled this will return `0`.
 
+## src/functions/oneWinningOutcomePayouts.se
+
+### Data Structure of oneWinningOutcomePayouts Contract:
+
+`oneWinningOutcomePayouts` has no data structure and no events are defined in the contract. This contract is used to pay out markets that have only 1 winning outcome, so binary markets and categorical markets.
+
+### oneWinningOutcomePayouts method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
++ oneOutcome(market, winningOutcome, sender, categoricalPointFive, numOutcomes):
+```
+`oneOutcome` is used to payout a market with only one winning outcome, like a binary market as an example. It requires a market ID `market`, the winning outcome value `winningOutcome`, the `sender` address who will be getting the payout, `categoricalPointFive` which is a boolean to indicate if this is an indeterminate categorical market in which all outcomes should get a payout evenly, and finally the number of outcomes `numOutcomes`. Returns `1` if successful.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
