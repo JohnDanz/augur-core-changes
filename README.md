@@ -2076,5 +2076,18 @@ The `tradeAvailableOrders` contract has no data structure of it's own but does d
 ```
 `tradeAvailableOrders` is used to fill the first order that fits the params passed to it. Given an array of `orderIDs`, this method will loop through the array and fill the `amountTakerWants` with the first order that is at or above the `fxpMinimumOrderBalance`. So if I have an array of orders and I want to buy 5 shares (`amountTakerWants`), and put the `fxpMinimumOrderBalance` as `5`, then the first order in the Orders array that has at least `5` shares to sell will be filled by my request. If this is successful it will write a `tradeAvailableOrdersLogArrayReturn` log with an array containing the response code (`1` for successful), the unfilled value, and the unfilled amount. If there are no orders in the orderIDs array that meet the critiera then the `tradeAvailableOrdersLogArrayReturn` log will be written with an array containing the value `-6` to indicate that there was no order available that was able to be filled.
 
+## src/functions/twoWinningOutcomePayouts.se
+
+### Data Structure of twoWinningOutcomePayouts Contract:
+
+There is no data structure or events defined in the `twoWinningOutcomePayouts` contract.
+
+### twoWinningOutcomePayouts methods:
+
+```
++ twoOutcomes(market, winningOutcome: arr, event, sender):
+```
+`twoOutcomes` is used to payout traders on markets with multiple winning outcomes such as a scalar market or a market that has more than 1 dimension of events, like a market relying on 2 binary events as an example would have 2 different winning outcomes, one for each binary event. This function requires the `market` we plan to payout for, the array of `winningOutcome`s for that `market`, the `event` tied to the `market`, and the `sender`. Returns `1` when successful.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
