@@ -2089,5 +2089,29 @@ There is no data structure or events defined in the `twoWinningOutcomePayouts` c
 ```
 `twoOutcomes` is used to payout traders on markets with multiple winning outcomes such as a scalar market or a market that has more than 1 dimension of events, like a market relying on 2 binary events as an example would have 2 different winning outcomes, one for each binary event. This function requires the `market` we plan to payout for, the array of `winningOutcome`s for that `market`, the `event` tied to the `market`, and the `sender`. Returns `1` when successful.
 
-# Ignore the below please.
-*Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
+## src/functions/wallet.se
+
+### Data Structure of wallet Contract:
+```
+data currency
+
+data winningOutcomeContract
+```
+The `wallet` contract has two data structures, `currency` and `winningOutcomeContract`. The `currency` is the token address of the currency held within this wallet. The `winningOutcomeContract` is the contract address for either `oneWinningOutcomePayouts` or `twoWinningOutcomePayouts` depending on the market and how many winning outcomes are possible. The `wallet` contract is intended to be used to hold funds for branches, events, and markets in various sub-currencies.
+
+### wallet methods:
+
+```
++ initialize(currency):
+```
+`initialize` takes in a `currency` token address. It sets the `data currency` to the passed in `currency` if `data currency` isn't already defined.
+
+```
++ setWinningOutcomeContractAddressInitialize(currency, addr):
+```
+`setWinningOutcomeContractAddressInitialize` is used to set `data currency` and the `data winningOutcomeContract` for the wallet. The two contracts used to payout winning outcomes are `oneWinningOutcomePayouts` and `twoWinningOutcomePayouts` and the `addr` value should be one of these two contract's addresses. `currency` is the token address for the currency used in this wallet. If `data currency` is already defined then this will not overwrite the current `data currency` and it will not set the `data winningOutcomeContract` to the `addr` passed.
+
+```
++ transfer(receiver: address, value: uint256):
+```
+`transfer` is used to send an amount (`value`) of currency to a `receiver` address from the wallet contract.
