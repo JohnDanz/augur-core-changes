@@ -2011,5 +2011,53 @@ Changed to `slashRep(branch, salt, report, ethics, reporter, event):`. The param
 
 Possible errors include: `-1` if it's an invalid votePeriod, `-2` if we are past the date of reveal, `-3` for invalid claims or `reportHash`, users should make sure that the colluding `reporter`'s commit is the same as the params passed to `slashRep`, `-4` if the event isn't in the branch specified, and `-5` if already slashed.
 
+## src/functions/trade.se
+
+### Data Structure of trade Contract:
+```
+event logPrice(
+  market:indexed,
+  sender:indexed,
+  owner:indexed,
+  type,
+  price,
+  amount,
+  timestamp,
+  orderID,
+  outcome,
+  askerSharesFilled,
+  askerMoneyFilled,
+  bidderSharesFilled,
+  bidderMoneyFilled
+)
+
+event tradeLogReturn(
+  returnValue
+)
+
+event tradeLogArrayReturn(
+  returnArray: arr
+)
+```
+There is no data structure for the `trade` contract and it now has only three events defined. The `tradeLogReturn` and `tradeLogArrayReturn` methods are the same as in master currently except they have been renamed from `trade_logReturn` and `trade_logArrayReturn` respectively. `log_fill_tx` and `log_short_fill_tx` have been removed and replaced with `logPrice`. `logPrice` records the `market` to the trade was placed on, the `sender` of the request to take an order, the `owner` who is the address who placed the order on the books, type is the `type` of trade (bid/ask), `price` per share, `amount` of shares filled, `timestamp` of the trade, `orderID` of the order, the `outcome` it's trading on, `askerSharesFilled` and `askerMoneyFilled` are the amount of shares and money filled by an asker, `bidderSharesFilled` and `bidderMoneyFilled` are the amount of shares and money filled by a bidder. This log is written when a bid or ask order is successfully filled or partially filled.
+
+### trade method changes, additions, and removals:
+```
+Key : description
+!   : Modified method
+-   : removed method
++   : added method
+```
+*Any function not explicitly mentioned is unchanged from it's current master iteration. When a function is changed, first I will show the old signature that's currently in place in master, then outside of the code preview I will indicate the new signature and why.*
+
+```
+! trade(max_value, max_amount, trade_ids:arr, tradeGroupID):
+```
+Changed to `trade(orderID, amountTakerWants):`. trade is used to pick up or take an order off the order book. It now requires just an `orderID` for the order we intend to take and the `amountTakerWants` is simply the number of shares to take from that order. Possible errors include: `0` if the order doesn't exist, `-1` if the order hash is bad, `-2` if the `amountTakerWants` isn't at least 0.00000001, `-3` if you try to take your own order, `-4` if you have an insufficient balance to complete the request, `-5` if the order hasn't been mined yet (same block).
+
+```
+- short_sell(buyer_trade_id, max_amount, tradeGroupID):
+```
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
