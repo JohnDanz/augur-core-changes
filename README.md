@@ -2059,5 +2059,22 @@ Changed to `trade(orderID, amountTakerWants):`. trade is used to pick up or take
 - short_sell(buyer_trade_id, max_amount, tradeGroupID):
 ```
 
+## src/functions/tradeAvailableOrders.se
+
+### Data Structure of tradeAvailableOrders Contract:
+```
+event tradeAvailableOrdersLogArrayReturn(
+  returnArray: arr
+)
+```
+The `tradeAvailableOrders` contract has no data structure of it's own but does define an event. `tradeAvailableOrdersLogArrayReturn` event writes a log with the `returnArray` when `tradeAvailableOrders` is successfully called.
+
+### tradeAvailableOrders methods:
+
+```
++ tradeAvailableOrders(orderIDs: arr, amountTakerWants, fxpMinimumOrderBalance):
+```
+`tradeAvailableOrders` is used to fill the first order that fits the params passed to it. Given an array of `orderIDs`, this method will loop through the array and fill the `amountTakerWants` with the first order that is at or above the `fxpMinimumOrderBalance`. So if I have an array of orders and I want to buy 5 shares (`amountTakerWants`), and put the `fxpMinimumOrderBalance` as `5`, then the first order in the Orders array that has at least `5` shares to sell will be filled by my request. If this is successful it will write a `tradeAvailableOrdersLogArrayReturn` log with an array containing the response code (`1` for successful), the unfilled value, and the unfilled amount. If there are no orders in the orderIDs array that meet the critiera then the `tradeAvailableOrdersLogArrayReturn` log will be written with an array containing the value `-6` to indicate that there was no order available that was able to be filled.
+
 # Ignore the below please.
 *Please ignore everything below this line as not part of the change log, simply some notes for upcoming updates to the change log.*
