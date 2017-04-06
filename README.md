@@ -42,6 +42,7 @@ src/functions/
   * completeSets.se
   <- compositeGetters.se
   * consensus.se
+  * controller.se
   * createBranch.se
   * createMarket.se
   + eventHelpers.se
