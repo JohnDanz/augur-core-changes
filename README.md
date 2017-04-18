@@ -1224,6 +1224,8 @@ The only change to `topics` is the addition of the `controller`. Like most contr
 
 ### Data Structure of bidAndAsk Contract:
 ```
+data controller
+
 event logAddTx(
   market:indexed,
   sender:indexed,
@@ -1252,7 +1254,9 @@ event buyAndSellSharesLogReturn(
   returnValue
 )
 ```
-There is no data structures for the `bidAndAsk` contract but there are events defined that are emitted by some of the methods in `bidAndAsk`. It appears that for the most part, what used to be `buy&sellShares.se` has been renamed to `bidAndAsk.se` and some methods have been removed and have been replaced with a more all encompassing `placeOrder` method instead of individual `buy`, `sell`, and `shortAsk` methods.
+The only data in the `bidAndAsk` contract is the `controller`. Like most contracts, `bidAndAsk` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
+
+ `bidAndAsk` also has events defined that are emitted by some of the methods in `bidAndAsk`. It appears that for the most part, what used to be `buy&sellShares.se` has been renamed to `bidAndAsk.se` and some methods have been removed and have been replaced with a more all encompassing `placeOrder` method instead of individual `buy`, `sell`, and `shortAsk` methods.
 
 `logAddTx` is fired off when `placeOrder` is called and it is successful. `logCancel` is fired off when a user decides to `cancel` an order. `buyAndSellSharesLogReturn` is fired off to indicate wether the attempt to place or cancel an order was successful or not. If you place an order, and it's successful it will log the orderID as the `returnValue`. If it's a failure, it will log `0` which is a failure. If you attempt to cancel an order, and it's successful then the returnValue for the log will be `1` which is a success.
 
@@ -1304,6 +1308,10 @@ data symbol
 
 data decimals
 
+data initiated[<address>]
+
+data controller
+
 event Transfer(
   from:indexed,
   to:indexed,
@@ -1318,7 +1326,9 @@ event Approval(
 ```
 The `cash` contract has moved from the `data_api` folder to the `functions` folder. The data structure and events are all completely different then the previous implementation of `cash` currently in master. We have a new data array called `accounts` which is indexed by addresses. Each address will have a `balance` and another array called `spenders` which is also indexed by addresses, in this case an address authorized to spend for you. Inside of the `spenders` array contains a single value, `maxValue` which is the maximum value a `spender` can spend from the owner of the account's balance.
 
-We then have 4 pieces of data: `totalSupply`, 'name', 'symbol', and 'decimals'. `totalSupply` is the total supply of cash in the `Cash` contract. `name` is the name of the currency used in the cash contract which is currently set to `"Cash"` during `init()`. `symbol` is the symbol used as a shorthand for the name, like a $ sign is for US Dollars, currently set to `"CASH"` during `init()`. `decimals` is the number of decimal places used for a unit of REP, currently set to `18` during `init()`.
+We then have 6 pieces of data: `totalSupply`, 'name', 'symbol', 'decimals', `initiated[<address>]`, and `controller`. `totalSupply` is the total supply of cash in the `Cash` contract. `name` is the name of the currency used in the cash contract which is currently set to `"Cash"` during `init()`. `symbol` is the symbol used as a shorthand for the name, like a $ sign is for US Dollars, currently set to `"CASH"` during `init()`. `decimals` is the number of decimal places used for a unit of `REP`, currently set to `18` during `init()`. `initiated[<address>]` contains an array of timestamps for when a `withdrawEther` request was initiated, indexed by `msg.sender` address of the `withdrawEther` method.
+
+Like most contracts, `cash` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 Two events are also potentially emitted to save logs from this contract, they are `Transfer` and `Approval`. I'll discuss where they are emitted in the method section below.
 
@@ -1383,6 +1393,11 @@ Renamed `balanceOf(address: address):`.
 `commitSuicide` will delete and remove the contract from the blockchain and return all ether in this contract to the `msg.sender`. `msg.sender` must be equal to the suicide address or this will fail.
 
 ```
++ getInitiated():
+```
+`getInitiated` returns the timestamp for when a `withdrawEther` request was made by the `msg.sender`. Uses `msg.sender` as the index for the `initiated[<address>]` data structure.
+
+```
 - initiateOwner(account):
 - send(recver, value):
 - sendFrom(recver, value, from):
@@ -1390,13 +1405,15 @@ Renamed `balanceOf(address: address):`.
 - subtractCash(ID, amount):
 ```
 
-## src/functions/claimProceeds.se
+## src/functions/claimMarketProceeds.se
 
-### Data Structure of claimProceeds Contract:
+### Data Structure of claimMarketProceeds Contract:
+```
+data controller
+```
+Like most contracts, `claimMarketProceeds` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
-There is no data structure for the `claimProceeds` contract.
-
-### claimProceeds method:
+### claimMarketProceeds method:
 
 ```
 + claimProceeds(market):
@@ -1408,11 +1425,15 @@ There is no data structure for the `claimProceeds` contract.
 
 ### Data Structure of closeMarket Contract:
 ```
+data controller
+
 event closeMarketLogReturn(
   returnValue
 )
 ```
 `closeMarket` has changed a bit from it's current iteration in master. It used to contain a `closeMarket` event, and a `closeMarket_logReturn` event, however `closeMarket` is no longer an event and `closeMarket_logReturn` has been renamed to `closeMarketLogReturn`.
+
+Like most contracts, `closeMarket` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### closeMarket method changes, additions, and removals:
 ```
@@ -1440,7 +1461,11 @@ Changed `closeMarket(market, sender):` to no longer require a `branch` param. `c
 ## src/functions/collectFees.se
 
 ### Data Structure of collectFees Contract:
-`collectFees` has no data structure of it's own. It also no longer has an event called `collectedFees` defined.
+```
+data controller
+```
+
+`collectFees` no longer has an event called `collectedFees` but has added `controller`. Like most contracts, `collectFees` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### collectFees method changes, additions, and removals:
 ```
@@ -1472,8 +1497,10 @@ event completeSetsLogReturn(
   returnValue,
   numOutcomes
 )
+
+data controller
 ```
-`completeSets` has no data structure of it's own. It does however have an event, `completeSetsLogReturn` which creates a log with information about the `sender`, `market`, `type` of trade, the `returnValue`, and the number of outcomes bought or sold `numOutcomes`.
+Like most contracts, `completeSets` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur. `completeSets` also has an event, `completeSetsLogReturn` which creates a log with information about the `sender`, `market`, `type` of trade, the `returnValue`, and the number of outcomes bought or sold `numOutcomes`.
 
 ### completeSets method changes, additions, and removals:
 ```
@@ -1498,6 +1525,8 @@ Changed to `sellCompleteSets(market, fxpAmount):`. Like `buyCompleteSets`, we ha
 
 ### Data Structure of consensus Contract:
 ```
+data controller
+
 event penalize(
   user:indexed,
   outcome,
@@ -1507,12 +1536,15 @@ event penalize(
   p,
   reportValue
 )
+
 event consensusLogReturn(
   returnValue
 )
 ```
 
-There is no data structure in the consensus contract but there are two events. One of them is `consensusLogReturn` which simply contains a `returnValue` and is unchanged from it's master iteration aside from a name change from `consensus_logReturn` to `consensusLogReturn`. `penalize` keeps its name the same but it's params have changed. Instead of sender, we have `user` which is set to the `msg.sender`. We no longer record a `branch`, `event`, `penalizedUpTo`, or `timestamp`. `outcome`, `oldrep` which is just the `beforeRep` value for `msg.sender`, `repchange`, `p` (proportionCorrect), and `reportValue` are all still recorded as before. `newafterrep` has been added and is the `afterRep` value for the `msg.sender`.  
+Like most contracts, `consensus` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
+
+`consensus` also has two events defined. One event is `consensusLogReturn` which simply contains a `returnValue` and is unchanged from it's master iteration aside from a name change from `consensus_logReturn` to `consensusLogReturn`. `penalize` keeps its name the same but it's params have changed. Instead of sender, we have `user` which is set to the `msg.sender`. We no longer record a `branch`, `event`, `penalizedUpTo`, or `timestamp`. `outcome`, `oldrep` which is just the `beforeRep` value for `msg.sender`, `repchange`, `p` (proportionCorrect), and `reportValue` are all still recorded as before. `newafterrep` has been added and is the `afterRep` value for the `msg.sender`.  
 
 ### consensus method changes, additions, and removals:
 
@@ -1522,9 +1554,9 @@ Both `penalizeWrong(branch, event):` and `incrementPeriodAfterReporting(branch):
 
 ### Data Structure of createBranch Contract:
 ```
-data ethContract
+data controller
 ```
-The only data structure in `createBranch` is the `ethContract` address. This is set during `init()` and should be set to the `ETH` sub currency contract address.
+Like most contracts, `createBranch` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### createBranch method changes, additions, and removals:
 ```
@@ -1540,15 +1572,13 @@ Key : description
 ```
 Changed to `createSubbranch(description:str, periodLength, parent, fxpMinTradingFee, oracleOnly, mostRecentChildBranch):`. `minTradingFee` has become `fxpMinTradingFee` in order to indicate this is a fixed point value. `mostRecentChildBranch` has been added as a param and is expected to be the most recent child branch address, or 0 for user created branches. This function returns the branch ID created as it's return value if it's successful. Possible errors are `-1` for bad input or non existent parent branch, `-2` is thrown if the branch already exists.
 
-```
-+ init():
-```
-`init` sets the `ethContract` to the `ETH` sub currency address.
 
 ## src/functions/createMarket.se
 
 ### Data Structure of createMarket Contract:
 ```
+data controller
+
 event marketCreated(
   market
 )
@@ -1558,7 +1588,9 @@ event tradingFeeUpdated(
   fxpTradingFee
 )
 ```
-The `createMarket` contract has no data structure but keeps it's two event logs that exist in master, `marketCreated` and `tradingFeeUpdated`. Both events have been simplified to include less data in the log that is written when they are triggered. For `createMarket` we only are storing the `marketID` in the log created when previously we would record the `sender`, the `marketID`, the `topic`, the `branch`, the `creationFee`, the `eventBond`, and the creation `timestamp`. `tradingFeeUpdated` has also lost a few values it used to record such as `sender`, `branch`, and `timestamp`. `tradingFee` has been changed to `fxpTradingFee` to indicate this is a fixed point value. `marketID` is now simply `market`.
+Like most contracts, `createMarket` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
+
+The `createMarket` contract keeps it's two event logs that exist in master, `marketCreated` and `tradingFeeUpdated`. Both events have been simplified to include less data in the log that is written when they are triggered. For `createMarket` we only are storing the `marketID` in the log created when previously we would record the `sender`, the `marketID`, the `topic`, the `branch`, the `creationFee`, the `eventBond`, and the creation `timestamp`. `tradingFeeUpdated` has also lost a few values it used to record such as `sender`, `branch`, and `timestamp`. `tradingFee` has been changed to `fxpTradingFee` to indicate this is a fixed point value. `marketID` is now simply `market`.
 
 
 ### createMarket method changes, additions, and removals:
@@ -1616,8 +1648,10 @@ Changed to `updateTradingFee(market, fxpTradingFee):`. `updateTradingFee` has dr
 ## src/functions/eventResolution.se
 
 ### Data Structure of eventResolution Contract:
-
-`eventResolution` doesn't have a data structure or events of it's own.
+```
+data controller
+```
+Like most contracts, `eventResolution` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### eventResolution method changes, additions, and removals:
 ```
@@ -1635,14 +1669,19 @@ Changed to `resolveCategoricalOrScalar(fxpScaledMin, fxpScaledMax, event, market
 
 ## src/functions/faucets.se
 
-Faucets is unchanged.
-
+### Data Structure of faucets Contract:
+```
+data controller
+```
+Like most contracts, `faucets` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur. Otherwise `faucets` is unchanged from master.
 
 ## src/functions/forking.se
 
 ### Data Structure of forking Contract:
-
-`forking` doesn't have a data structure of it's own.
+```
+data controller
+```
+Like most contracts, `forking` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### forking method changes, additions, and removals:
 ```
@@ -1666,8 +1705,10 @@ Renamed to `resolveFork(branch):`.
 ## src/functions/forkPenalize.se
 
 ### Data Structure of forkPenalize Contract:
-
-`forkPenalize` doesn't have a data structure of it's own.
+```
+data controller
+```
+Like most contracts, `forkPenalize` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### forkPenalize method changes, additions, and removals:
 ```
@@ -1686,11 +1727,15 @@ Key : description
 
 ### Data Structure of makeReports Contract:
 ```
+data controller
+
 event makeReportsLogReturn(
   returnValue
 )
 ```
-The `makeReports` contract doesn't have a data structure and now only contains one event for writing a log: `makeReportsLogReturn`. `makeReportsLogReturn` has been renamed from the old event `makeReports_logReturn`. `submittedReportHash` and `submittedReport` events have been removed from this contract.
+Like most contracts, `makeReports` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
+
+The `makeReports` contract contains one event for writing a log: `makeReportsLogReturn`. `makeReportsLogReturn` has been renamed from the old event `makeReports_logReturn`. `submittedReportHash` and `submittedReport` events have been removed from this contract.
 
 ### makeReports method changes, additions, and removals:
 ```
@@ -1757,9 +1802,13 @@ event Trade(
 )
 
 data amountFilled[<orderHash>]
+
+data controller
 ```
 
-`offChainTrades.se` has been added to the contracts in `develop`. It has three events and one data structure. `amountFilled` is indexed by the `orderHash` of an off chain order. It contains the amount of shares an order has filled so far. `Order` is an event that writes a log whenever `onChainOrder` is called successfully. It's used to store a record of an off chain order being placed. It stores the address of the token we plan to sell as `tokenY`. The amount of `tokenY` to sell is defined as `orderSize`. The address for the token we plan to buy is `tokenX`. The exchange rate of `tokenY` for each `tokenX` is defined by `fxpPrice`. The `expiration` for the order and the `user` who placed the order are also recorded.
+`offChainTrades.se` has been added to the contracts in `develop`. It has three events and two data structure. `amountFilled` is indexed by the `orderHash` of an off chain order. It contains the amount of shares an order has filled so far. Like most contracts, `offChainTrades` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
+
+`Order` is an event that writes a log whenever `onChainOrder` is called successfully. It's used to store a record of an off chain order being placed. It stores the address of the token we plan to sell as `tokenY`. The amount of `tokenY` to sell is defined as `orderSize`. The address for the token we plan to buy is `tokenX`. The exchange rate of `tokenY` for each `tokenX` is defined by `fxpPrice`. The `expiration` for the order and the `user` who placed the order are also recorded.
 
 `Cancel` is called when an order is successfully canceled by the `user` who posted the order. `Cancel` records the `tokenY` address, the amount of `tokenY` as `orderSize`, the address for the `tokenX` accepted for `tokenY` and the rate of exchange (`fxpPrice`) one `tokenX` is worth to `tokenY`. It also records `expiration` of the order and the `user` who posted the order originally. This is all similar to `Order` however `Cancel` also requires the `v`, `r`, and `s` fields of the `user` who placed the order in order to verify that the order was sent by `user`.
 
@@ -1799,8 +1848,11 @@ Possible errors are: `0` if the orderHash can't be verified. `-1` if the order h
 ## src/functions/oneWinningOutcomePayouts.se
 
 ### Data Structure of oneWinningOutcomePayouts Contract:
+```
+data controller
+```
 
-`oneWinningOutcomePayouts` has no data structure and no events are defined in the contract. This contract is used to pay out markets that have only 1 winning outcome, so binary markets and categorical markets.
+Like most contracts, `oneWinningOutcomePayouts` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur. `oneWinningOutcomePayouts` contract is used to pay out markets that have only 1 winning outcome, so binary markets and categorical markets.
 
 ### oneWinningOutcomePayouts method changes, additions, and removals:
 ```
@@ -1819,8 +1871,10 @@ Key : description
 ## src/functions/penalizationCatchup.se
 
 ### Data Structure of penalizationCatchup Contract:
-
-`penalizationCatchup` has no data structure and no events are defined in the contract. The `penalizationCaughtUp` event is no longer a part of this contract and no such log is written when calling `penalizationCatchup`.
+```
+data controller
+```
+Like most contracts, `penalizationCatchup` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur. The `penalizationCaughtUp` event is no longer a part of this contract and no such log is written when calling `penalizationCatchup`.
 
 ### penalizationCatchup method changes, additions, and removals:
 
@@ -1832,8 +1886,10 @@ penalizationCatchup(branch, sender):
 ## src/functions/penalizeNotEnoughReports.se
 
 ### Data Structure of penalizeNotEnoughReports Contract:
-
-`penalizeNotEnoughReports` has no data structure and no events are defined in the contract.
+```
+data controller
+```
+Like most contracts, `penalizeNotEnoughReports` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### penalizeNotEnoughReports method changes, additions, and removals:
 
@@ -1845,8 +1901,10 @@ proveReporterDidntReportEnough(branch, reporter, eventExample):
 ## src/functions/roundTwo.se
 
 ### Data Structure of roundTwo Contract:
-
-`roundTwo` has no data structure and no events are defined in the contract.
+```
+data controller
+```
+Like most contracts, `roundTwo` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### roundTwo method changes, additions, and removals:
 ```
@@ -1860,13 +1918,15 @@ Key : description
 ```
 ! roundTwoPostBond(branch, event, eventIndex, votePeriod):
 ```
-Changed to `roundTwoPostBond(branch, event, eventIndex, overEthicality):`. We still need `branch`, `event`, and `eventIndex` but instead of `votePeriod` we now require `overEthicality`. `overEthicality` is a boolean indicating wether the the bond is being posted in order to dispute an `event` over it's ethics or not. This function will return `1` if successful. Will throw if `msg.value` is not enough to cover the cost of the resolution or the bond isn't large enough. Possible errors include: `0` for an invalid branch or period, `-1` if the event was pushed forward in which case posting a bond isn't allowed during the event being moved, `-2` if the branch is in middle of a fork, `-3` if there is not enough money in `msg.value`, `-4` if the `event` has no votes.
+Changed to `roundTwoPostBond(branch, event, eventIndex, overEthicality):`. We still need `branch`, `event`, and `eventIndex` but instead of `votePeriod` we now require `overEthicality`. `overEthicality` is a boolean indicating wether the the bond is being posted in order to dispute an `event` over it's ethics or not. This function will return `1` if successful. Will throw if `msg.value` is not enough to cover the cost of the resolution or the bond isn't large enough. Possible errors include: `0` for an invalid branch or period, `-2` if the branch is in middle of a fork, `-3` if there is not enough money in `msg.value`, `-4` if the `event` has no votes.
 
 ## src/functions/roundTwoPenalize.se
 
 ### Data Structure of roundTwoPenalize Contract:
-
-`roundTwoPenalize` has no data structure and no events are defined in the contract.
+```
+data controller
+```
+Like most contracts, `roundTwoPenalize` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### roundTwoPenalize method changes, additions, and removals:
 
@@ -1883,6 +1943,8 @@ data amountCanSpend[<address(owner)>][<address(spender)>](
   branch[<branch>]
 )
 
+data controller
+
 event Transfer(
   from:indexed,
   to:indexed,
@@ -1896,7 +1958,9 @@ event Approval(
   value
 )
 ```
-`sendReputation` has one data structure defined and two events defined which have had renamed params. `amountCanSpend` is a multi-dimensional array indexed by the address of an `owner` of an account and the address of the approved `spender` for that owned account. Inside is a `branch` array indexed by a branch ID with fixed point values for the amount of dormant `REP` an approved `spender` is allowed to withdraw from the `owner`'s account.
+`sendReputation` has two data structures defined and two events defined which have had renamed params. `amountCanSpend` is a multi-dimensional array indexed by the address of an `owner` of an account and the address of the approved `spender` for that owned account. Inside is a `branch` array indexed by a branch ID with fixed point values for the amount of dormant `REP` an approved `spender` is allowed to withdraw from the `owner`'s account.
+
+Like most contracts, `sendReputation` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 The `Transfer` event writes a `Transfer` log whenever a successful call to `sendRepFrom` or `transferFrom` is executed. The `Transfer` log stores the `from` address for a transfer of `REP`, the `to` address, and the `value` amount of `REP` which should be fixed point.
 
@@ -1972,6 +2036,8 @@ data symbol
 
 data decimals
 
+data controller
+
 event Transfer(
   from:indexed,
   to:indexed,
@@ -1984,7 +2050,9 @@ event Approval(
   value
 )
 ```
-The `shareTokens` contract is a erc20 token wrapper for shares. There are five data structures and two events defined in the `shareTokens` contract. Four of the data structures are simple and self explanitory, they are `totalSupply`, `name`, `symbol`, and `decimals`. `totalSupply` is the total supply of shares in the contract, `name` is the name of the token, which is `"Shares"` by default, the symbol is set to `"SHARE"` and the `decimals` is the amount of decimal places each Share has, in this case `18`. There is also an `accounts` array indexed by account addresses. Within the `accounts` array is a `balance` of shares for that account, and an array of authorized `spenders` indexed by account addresses. Inside of the `spenders` array is the maximum value (`maxValue`) of how much a spender is authorized to withdraw from the owner of the account.
+The `shareTokens` contract is a erc20 token wrapper for shares. There are six data structures and two events defined in the `shareTokens` contract. Four of the data structures are simple and self explanitory, they are `totalSupply`, `name`, `symbol`, and `decimals`. `totalSupply` is the total supply of shares in the contract, `name` is the name of the token, which is `"Shares"` by default, the symbol is set to `"SHARE"` and the `decimals` is the amount of decimal places each Share has, in this case `18`. There is also an `accounts` array indexed by account addresses. Within the `accounts` array is a `balance` of shares for that account, and an array of authorized `spenders` indexed by account addresses. Inside of the `spenders` array is the maximum value (`maxValue`) of how much a spender is authorized to withdraw from the owner of the account.
+
+Like most contracts, `shareTokens` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 The `Transfer` event creates a `Transfer` log whenever a successful call to `transfer` or `transferFrom` is made. It records the person who sent the shares ('from'), the person who recieved the shares ('to'), and the amount of shares sent ('value').
 
@@ -2063,7 +2131,11 @@ Key : description
 ## src/functions/slashRep.se
 
 ### Data Structure of slashRep Contract:
-`slashRep` has no data structure or events of it's own.
+```
+data controller
+```
+
+Like most contracts, `slashRep` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### slashRep method changes, additions, and removals:
 ```
@@ -2085,6 +2157,8 @@ Possible errors include: `-1` if it's an invalid votePeriod, `-2` if we are past
 
 ### Data Structure of trade Contract:
 ```
+data controller
+
 event logPrice(
   market:indexed,
   sender:indexed,
@@ -2109,7 +2183,11 @@ event tradeLogArrayReturn(
   returnArray: arr
 )
 ```
-There is no data structure for the `trade` contract and it now has only three events defined. The `tradeLogReturn` and `tradeLogArrayReturn` methods are the same as in master currently except they have been renamed from `trade_logReturn` and `trade_logArrayReturn` respectively. `log_fill_tx` and `log_short_fill_tx` have been removed and replaced with `logPrice`. `logPrice` records the `market` to the trade was placed on, the `sender` of the request to take an order, the `owner` who is the address who placed the order on the books, type is the `type` of trade (bid/ask), `price` per share, `amount` of shares filled, `timestamp` of the trade, `orderID` of the order, the `outcome` it's trading on, `askerSharesFilled` and `askerMoneyFilled` are the amount of shares and money filled by an asker, `bidderSharesFilled` and `bidderMoneyFilled` are the amount of shares and money filled by a bidder. This log is written when a bid or ask order is successfully filled or partially filled.
+There is only one data structure for the `trade` contract and it now has only three events defined.
+
+Like most contracts, `trade` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
+
+The `tradeLogReturn` and `tradeLogArrayReturn` events are the same as in master currently except they have been renamed from `trade_logReturn` and `trade_logArrayReturn` respectively. `log_fill_tx` and `log_short_fill_tx` have been removed and replaced with `logPrice`. `logPrice` records the `market` to the trade was placed on, the `sender` of the request to take an order, the `owner` who is the address who placed the order on the books, type is the `type` of trade (bid/ask), `price` per share, `amount` of shares filled, `timestamp` of the trade, `orderID` of the order, the `outcome` it's trading on, `askerSharesFilled` and `askerMoneyFilled` are the amount of shares and money filled by an asker, `bidderSharesFilled` and `bidderMoneyFilled` are the amount of shares and money filled by a bidder. This log is written when a bid or ask order is successfully filled or partially filled.
 
 ### trade method changes, additions, and removals:
 ```
@@ -2123,7 +2201,7 @@ Key : description
 ```
 ! trade(max_value, max_amount, trade_ids:arr, tradeGroupID):
 ```
-Changed to `trade(orderID, amountTakerWants):`. trade is used to pick up or take an order off the order book. It now requires just an `orderID` for the order we intend to take and the `amountTakerWants` is simply the number of shares to take from that order. Possible errors include: `0` if the order doesn't exist, `-1` if the order hash is bad, `-2` if the `amountTakerWants` isn't at least 0.00000001, `-3` if you try to take your own order, `-4` if you have an insufficient balance to complete the request, `-5` if the order hasn't been mined yet (same block).
+Changed to `trade(orderID, amountTakerWants):`. trade is used to pick up or take an order off the order book. It now requires just an `orderID` for the order we intend to take and the `amountTakerWants` is simply the number of shares to take from that order. Possible errors include: `0` if the order doesn't exist, `-1` if the order hash is bad, `-2` because an order in the same block is prohibited, and `-3` if you try to take your own order.
 
 ```
 - short_sell(buyer_trade_id, max_amount, tradeGroupID):
@@ -2133,11 +2211,14 @@ Changed to `trade(orderID, amountTakerWants):`. trade is used to pick up or take
 
 ### Data Structure of tradeAvailableOrders Contract:
 ```
+data controller
+
 event tradeAvailableOrdersLogArrayReturn(
   returnArray: arr
 )
 ```
-The `tradeAvailableOrders` contract has no data structure of it's own but does define an event. `tradeAvailableOrdersLogArrayReturn` event writes a log with the `returnArray` when `tradeAvailableOrders` is successfully called.
+The `tradeAvailableOrders` contract has one data structure and one event.
+Like most contracts, `tradeAvailableOrders` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur. The `tradeAvailableOrdersLogArrayReturn` event writes a log with the `returnArray` when `tradeAvailableOrders` is successfully called.
 
 ### tradeAvailableOrders methods:
 
@@ -2149,8 +2230,11 @@ The `tradeAvailableOrders` contract has no data structure of it's own but does d
 ## src/functions/twoWinningOutcomePayouts.se
 
 ### Data Structure of twoWinningOutcomePayouts Contract:
+```
+data controller
+```
 
-There is no data structure or events defined in the `twoWinningOutcomePayouts` contract.
+Like most contracts, `twoWinningOutcomePayouts` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### twoWinningOutcomePayouts methods:
 
@@ -2166,8 +2250,10 @@ There is no data structure or events defined in the `twoWinningOutcomePayouts` c
 data currency
 
 data winningOutcomeContract
+
+data controller
 ```
-The `wallet` contract has two data structures, `currency` and `winningOutcomeContract`. The `currency` is the token address of the currency held within this wallet. The `winningOutcomeContract` is the contract address for either `oneWinningOutcomePayouts` or `twoWinningOutcomePayouts` depending on the market and how many winning outcomes are possible. The `wallet` contract is intended to be used to hold funds for branches, events, and markets in various sub-currencies.
+The `wallet` contract has three data structures, `currency`, `winningOutcomeContract`, and `controller`. `controller` is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur. The `currency` is the token address of the currency held within this wallet. The `winningOutcomeContract` is the contract address for either `oneWinningOutcomePayouts` or `twoWinningOutcomePayouts` depending on the market and how many winning outcomes are possible. The `wallet` contract is intended to be used to hold funds for branches, events, and markets in various sub-currencies.
 
 ### wallet methods:
 
