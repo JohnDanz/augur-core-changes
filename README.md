@@ -42,7 +42,7 @@ src/functions/
   * completeSets.se
   <- compositeGetters.se
   * consensus.se
-  * controller.se
+  + controller.se
   * createBranch.se
   * createMarket.se
   + eventHelpers.se
@@ -98,9 +98,11 @@ data forking[<eventId>](
 )
 
 data resolved[<branch>][<forkPeriod>]
+
+data controller
 ```
 
-The roundTwo array now contains a new value, `disputedOverEthics`.   `disputedOverEthics` is a boolean indicating if the `event` was disputed over it's ethicality.
+The roundTwo array now contains a new value, `disputedOverEthics`.   `disputedOverEthics` is a boolean indicating if the `event` was disputed over it's ethicality. This contract, like most contracts, has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### backstops method changes, additions, and removals:
 ```
@@ -151,11 +153,16 @@ data Branches[<branch>](
 )
 
 data branchList[<index>]
+
 data branchListCount
+
+data controller
 ```
 With the update to the contracts planned in develop, we are switching to using "currency". When you see `currency` in the contracts that value is an address for the token allowed to be used on this branch. The balance array has changed to become multi-dimensional and now takes in both a period and the currency to work with balance since we have a new concept of multiple currencies allowed. So it's not enough to just ask for the balance in a period, you need to know what denomination of currency we want to get the balance of as an example. `minTradingFee` has become `fxpMinTradingFee`, which indicates that this value should be in fix point. The `contract[<currency>]` array was added and holds the `wallet` addresses for the indexed `currency` address. `numCurrencies` is a simple count of the number of currencies currently allowed on the `branch`.
 
 The `currencies[<index>](rate, rateContract, contract)` array was added and is a simple 0 indexed list. Inside each index you will find 3 values, the `contract` which is the `currency` address, the `rate` which is a fixed point exchange rate and the `rateContract` which is a contract with rates for the currency to be exchanged with `Eth` denominated in `Wei`. The `rate` will take precendence over the `rateContract` and only one is required per `currency`. `currencyToIndex[<currency>]` is a reverse mapping of currencies to their indices. `mostRecentChild` is the most recent child of a `branch`, `currencyActive[<currency>]` contains booleans indicating wether a currency is allowed to be used to create a new market or event. `forkTime` was also added as a timestamp for when the `branch` was forked.
+
+This contract, like most contracts, has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### branches method changes, additions, and removals:
 ```
@@ -289,8 +296,11 @@ A few things have changed with `initializeBranch`, `minTradingFee` has become th
 ## src/data_api/compositeGetters.se
 
 ### Data Structure of compositeGetters Contract:
+```
+data controller
+```
 
-compositeGetters doesn't have it's own data structure, it's also been moved from the `functions` folder to the `data_api` folder.
+`compositeGetters` has been moved from the `functions` folder to the `data_api` folder. `compositeGetters` only has a `controller` for it's data, which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### compositeGetters method changes, additions, and removals:
 ```
@@ -332,9 +342,13 @@ data refunds[<address/event>]
 
 data slashed[<branch>][<votePeriod>](
   reporter[<address>]
+
+data controller
 )
 ```
 There are only a few changes to the Data Structure of the consensusData contract. One of those changes is `feesCollected[<currency>][<address>]` has become multi-dimensional, it now takes the `currency` as the first index, and an account `address` as the second. This is to facilitate the new use of currencies throughout the augur contracts. Naturally if you want to know about `feesCollected` you will now need to have the user `address` and also the `currency` type to determine what denomination of fees we are looking for. The other addition is `repCollected[<address>]`. `repCollected` has been added to indicate wether the `address` has collected `REP` or not.
+
+Finally, like most contracts, `consensusData` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### consensusData method changes, additions, and removals:
 ```
@@ -409,14 +423,20 @@ data Events[<event>](
   challenged,
   resolveBondPoster,
   earlyResolutionBond,
-  creationTime
+  creationTime,
+  forkResolveAddress,
+  extraBondPoster
 )
 
 data past24Hours[<period>]
 
+data controller
+
 event logOutcome(event:indexed, outcome)
 ```
-Changes in the event contract's data structure include the change from `minValue, maxValue` to `fxpMinValue, fxpMaxValue` to further indicate that the minimum value and maximum value should be fixed point. `reportersPaidSoFarForEvent` contains the number of reporters who have been paid so far for a particular event. `resolutionAddress` is the address used to resolve an event first. `extraBond` contains the bond amount used to challenge the initial resolution. `firstPreliminaryOutcome` contains the outcome reported by the `resolutionAddress`. `challenged` contains a boolean of whether the event has been challenged already or not. `resolveBondPoster` is the address that posted the `REP` bond for the first resolution period. `earlyResolutionBond` contains the bond amount paid for an early resolution of a specified event. Finally `creationTime` was added to hold the timestamp of when a specified event was created.
+Changes in the event contract's data structure include the change from `minValue, maxValue` to `fxpMinValue, fxpMaxValue` to further indicate that the minimum value and maximum value should be fixed point. `reportersPaidSoFarForEvent` contains the number of reporters who have been paid so far for a particular event. `resolutionAddress` is the address used to resolve an event first. `extraBond` contains the bond amount used to challenge the initial resolution. `firstPreliminaryOutcome` contains the outcome reported by the `resolutionAddress`. `challenged` contains a boolean of whether the event has been challenged already or not. `resolveBondPoster` is the address that posted the `REP` bond for the first resolution period. `earlyResolutionBond` contains the bond amount paid for an early resolution of a specified event. `creationTime` was added to hold the timestamp of when a specified event was created. `forkResolveAddress` is an optional address used by the `event` to resolve the fork, this will be 0 if this `event` should use the default fork resolution process. `extraBondPoster` is the address who posted the bond to challenge the first resolution.
+
+Like most contracts, `events` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 Finally, one log event is defined in this contract called `logOutcome`. It stores an `event` and `outcome`. This log is fired off by the `getOutcome` method if the message sender calling `getOutcome` isn't the owner of the `event` or on the whitelist.
 
@@ -432,8 +452,8 @@ Key : description
 ! initializeEvent(ID, branch, expirationDate, minValue, maxValue, numOutcomes, resolution: str):
 ```
 Changed:
-`initializeEvent(ID, branch, expirationDate, fxpMinValue, fxpMaxValue, numOutcomes, resolution: str, resolutionAddress, resolveBondPoster):`
-The changes here come from the switch from plain `minValue` and `maxValue` to `fxpMinValue` and `fxpMaxValue` respectively. You also have two new fields expected, `resolutionAddress` which is optionally an address you want to have report to resolve the market. This is done if you want to have only 1 source for reporting, if this is not defined then this event will default to regular reporting. `resolveBondPoster` is the address of a person who posted the resolution bond, generally this will be the person who created the event.
+`initializeEvent(ID, branch, expirationDate, fxpMinValue, fxpMaxValue, numOutcomes, resolution: str, resolutionAddress, resolveBondPoster, forkResolveAddress):`
+The changes here come from the switch from plain `minValue` and `maxValue` to `fxpMinValue` and `fxpMaxValue` respectively. You also have two new fields expected, `resolutionAddress` which is optionally an address you want to have report to resolve the market. This is done if you want to have only 1 source for reporting, if this is not defined then this event will default to regular reporting. `resolveBondPoster` is the address of a person who posted the resolution bond, generally this will be the person who created the event. `forkResolveAddress` is an optional param that should be an address to use to for this event to resolve a fork, otherwise it should be 0 or undefined to use the normal fork resolution process for this event.
 
 ```
 + getCreationTime(event):
@@ -511,6 +531,21 @@ The changes here come from the switch from plain `minValue` and `maxValue` to `f
 `setEarlyResolutionBond` is used to set the early resolution `bond` amount for a certain `event`.
 
 ```
++ getForkResolveAddress(event)
+```
+`getForkResolveAddress` is used to return the `forkResolveAddress` value, which is either an address used by the `event` to resolve the fork or is `0` if the default method of resolving the fork should be used.
+
+```
++ setExtraBondPoster(event, poster):
+```
+`setExtraBondPoster` is used to set the `extraBondPoster` address given an `event` and the `poster` address.
+
+```
++ getExtraBondPoster(event):
+```
+`getExtraBondPoster` is used to return the `extraBondPoster` address value for a given `event`.
+
+```
 - getResolution(event):
 
 - getEthical(event):
@@ -558,12 +593,16 @@ data modeItems[<period>][<event>](
   currentMode,
   currentModeItems
 )
+
+data controller
 ```
 `expiringEvents`'s data structure has changed to a more simple structure overall. Previously there was a total of six data structures, but this has been shaved down to just three. The first is `periodEventInfo` which takes in a `branch` and `period`. `events[<index>]` and `eventToIndex[<event>]` are both arrays, `events[<index>]` contains a mapping of an index to event ID, where as `eventToIndex[<event>]` contains a mapping of an event ID to it's index. `requiredEvents[<event>]` contains a boolean to determine wether the event specified is required to be reported on. `committed[<event>]` keeps a count per event of how many reports have been committed so far for that event. `subsidy[<event>]` contains the amount of money used to payback the person who did the work to estimate the number of reporters needed for a specific `event`. `eventWeight[<event>]` contains event weight for a specific `event`. event weight is the number of reporters on an event in round 1 or the total rep reported on an event in backstop 1 or fork event.
 
 `lesserReportNum[<event>]` contains the number of reports you should have for a specified event. `numberEvents, roundTwoNumEvents, numReqEvents, numberRemoved` and `numEventsToReportOn` are all simple counts for the various things they are named for. The names seem descriptive enough to understand what each of those fields contain. `feeValue` returns the total fees for all markets on this `branch` expiring in this `period` denominated in `Wei`. `afterFork` contains the number of events created for a fork or 2 periods after the fork provided those events were created after the fork.
 
 The next data structure is `reporterPeriodInfo[<branch>][<period>]` which contains the reporter information for a specific `period`. `beforeRep[<address>]` and `afterRep[<address>]` both take in a reporter's address and return the amount of active rep for that reporter either before any modifications to `REP` for the period or after all modifications are complete. `periodDormantRep[<address>]` contains the amount of dormant `REP` for a specified account `address`. `reportHash[<address>][<event>]` contains the `reportHash` for a specific `event` submitted by a specific `address`. `saltyEncryptedHash[<address>][<event>]` holds the `saltyEncryptedHash` for a specific `address` and `event`. `report[<address>][<event>]` contains the actual reports for a specified reporter `address` and `event`. `ethics[<address>][<event>]` contains the ethicality of each report given a specified reporter `address` and `event`. `numReportsSubmitted[<event>]` is map of counts of the number of reports submitted for a specified `event` ID. `periodRepWeight[<address>]` contains weighting used used in the calculation of how many events a specific reporter `address` needs to report on. `numberOfActiveReporters` is the number of active Reporters for a specific `branch` and `period`. `reporters[<index>]` is a zero indexed array that maps to a reporter address. Finally we have `modeItems[<period>][<event>]` which is essentially unchanged except it's moved to a camelCase style instead of an_underscore_style of naming.
+
+Finally like most contracts, `expiringEvents` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### expiringEvents method changes, additions, and removals:
 ```
@@ -722,15 +761,19 @@ Changed: `addEvent(branch, futurePeriod, event, subsidy, currency, wallet, after
 ### Data Structure of info Contract:
 ```
 data Info[<branch/event/market ID>](
-  description[2048],
+  description[],
   descriptionLength,
   creator,
   creationFee,
   wallet,
   currency
 )
+
+data controller
 ```
 `info`'s data structure has only changed slightly. It still is indexed by an `ID` (this can be a branch ID, an event ID, or a market ID since these all share the same types of metadata). The new fields are `wallet` and `currency` which were added to accommodate the changes in the contracts to using the `currency` system.
+
+Like most contracts, `info` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### info method changes, additions, and removals:
 ```
@@ -803,10 +846,14 @@ data Markets[<market>](
 )
 
 data marketsHash[<branch>]
+
+data controller
 ```
 The `markets` contract's data structure has had some moderate changes. `makerFees`, `creationBlock`, and `creationTime` are no longer part of the Markets array data structure. `tradingFee` has been renamed to `fxpTradingFee` to indicate this is a fixed point value. `trade_ids` has been renamed to `orderIDs` and the data contained within has been renamed from `next_id` and `prev_id` to `nextID` and `prevID` respectively. Other renamed fields include `last_trade` and `total_trades` which have been converted to `lastOrder` and `totalOrders` respectively. `shareContracts[<outcome>]` has been added to store the erc20 token contract address for the shares related to each outcome in a market.
 
-Finally a new data structure was added with the following signature `marketsHash[<branch>]`. Given a `branch`, this array will contain a composite hash of all the markets on the specified `branch`.
+A new data structure was added with the following signature `marketsHash[<branch>]`. Given a `branch`, this array will contain a composite hash of all the markets on the specified `branch`.
+
+Finally like most contracts, `markets` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### markets method changes, additions, and removals:
 ```
@@ -875,7 +922,7 @@ Renamed `removeOrderFromMarket(marketID, orderID):`. It was also modified to use
 ```
 ! initializeMarket(marketID, events: arr, tradingPeriod, tradingFee, branch, tag1, tag2, tag3, makerFees, cumScale, numOutcomes, extraInfo: str, gasSubsidy, creationFee, lastExpDate):
 ```
-Changed `initializeMarket(market, events: arr, tradingPeriod, fxpTradingFee, branch, tag1, tag2, tag3, fxpcumulativeScale, numOutcomes, extraInfo: str, gasSubsidy, fxpCreationFee, lastExpDate, shareContracts: arr):`. `marketID` has been changed to just `market`. `tradingFee`, `cumScale`, and `creationFee` have all been renamed to `fxpTradingFee`, `fxpcumulativeScale`, and `fxpCreationFee` respectively to indicate that they are all fixed point values. `makerFees` has been removed. Finally `shareContracts` array was added, this array contains the addresses for erc20 share tokens for each outcome in the market.
+Changed `initializeMarket(market, events: arr, tradingPeriod, fxpTradingFee, branch, tag1, tag2, tag3, fxpCumulativeScale, numOutcomes, extraInfo: str, gasSubsidy, fxpCreationFee, lastExpDate, shareContracts: arr):`. `marketID` has been changed to just `market`. `tradingFee`, `cumScale`, and `creationFee` have all been renamed to `fxpTradingFee`, `fxpCumulativeScale`, and `fxpCreationFee` respectively to indicate that they are all fixed point values. `makerFees` has been removed. Finally `shareContracts` array was added, this array contains the addresses for erc20 share tokens for each outcome in the market.
 
 ```
 ! addTrade(market, trade_id, last_id):
@@ -939,17 +986,14 @@ data Reporting[<branch>](
     reporterID
   ),
   activeRep,
-  fork,
-  reportedOnNonFinalRoundTwoEvent
+  reportedOnNonFinalRoundTwoEvent[<address>]
 )
 
-data whitelists[<contract>](
-  addresses[<address>],
-  taken
-)
+data controller
 ```
-The only addition here is `reportedOnNonFinalRoundTwoEvent` added to the `Reporting[<branch>]` data structure. When a person reports on a round 2 event before it was in the second round [i.e. the first reporting backstop], then `reportedOnNonFinalRoundTwoEvent` will be set to the eventID of the event that was reported on. A reporter cannot convert their rep to dormant or send rep until they've finished the resolution process for that round 2 event. Once the round 2 event is final then `reportedOnNonFinalRoundTwoEvent` should be set to 0. Otherwise the data structure for reporting has remained the same.
+A few things have changed here in the `reporting` data structure. `fork` has been removed from the `reporting` data structure and added `reportedOnNonFinalRoundTwoEvent[<address>]`. When a person reports on a round 2 event before it was in the second round [i.e. the first reporting backstop], then `reportedOnNonFinalRoundTwoEvent[<address>]` will be set to the `eventID` of the event that was reported on given a reporter `address`. A reporter cannot convert their rep to dormant or send rep until they've finished the resolution process for that round 2 event. Once the round 2 event is final then `reportedOnNonFinalRoundTwoEvent[<address>]` should be set to 0.
 
+The `whitelist` data structure has been removed in favor of `controller`. Like most contracts, `reporting` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### reporting method changes, additions, and removals:
 ```
@@ -993,54 +1037,71 @@ subtractDormantRep(branch, index, fxpValue):
 The 5 methods above have renamed the `value` or `newRep` params to `fxpValue` or `fxpNewRep` to indicate that they should be a fixed point value.
 
 ```
-! setSaleDistribution(addresses: arr, balances: arr, branchID):
++ getReportedOnNonFinalRoundTwoEvent(branch, reporter):
 ```
-Changed `setSaleDistribution(addresses: arr, balances: arr, branch):` changed `branchID` to simply `branch`.
+`getReportedOnNonFinalRoundTwoEvent` was added to return the value contained in `reportedOnNonFinalRoundTwoEvent[<address>]` given a specified `branch` and `reporter` address. This will result in an `eventID` or `0` being returned.
 
 ```
-+ getReportedOnNonFinalRoundTwoEvent(branch):
++ setReportedOnNonFinalRoundTwoEvent(branch, event, reporter):
 ```
-`getReportedOnNonFinalRoundTwoEvent` was added to return the value contained in `reportedOnNonFinalRoundTwoEvent` given a specified `branch`. This will result in an `eventID` or `0` being returned.
-
-```
-+ setReportedOnNonFinalRoundTwoEvent(branch, event):
-```
-`setReportedOnNonFinalRoundTwoEvent` has been added to set the `reportedOnNonFinalRoundTwoEvent` value to the `event` passed on the specified `branch`.
+`setReportedOnNonFinalRoundTwoEvent` has been added to set the `reportedOnNonFinalRoundTwoEvent[<address>]` value to the `event` passed on the specified `branch` and `reporter` address.
 
 ```
 + claimInitialRep():
 ```
 `claimInitialRep` is used to claim initial `REP` for the sender from the `repContract`. This `REP` will be dormant until activated.
 
+```
+- checkWhitelist(address):
+
+- checkContractWhitelist(contract, address):
+
+- setWhitelist(contract, addresses: arr):
+
+- setSaleDistribution(addresses: arr, balances: arr, branch):
+
+- setFork(branch):
+
+- getFork(branch):
+```
+
 ## src/data_api/reportingThreshold.se
 
 ### Data Structure of reportingThreshold Contract:
+```
+data controller
+```
 
-`reportingThreshold` has no data structure of it's own. It contains all the methods required to deal with reporting thresholds.
+`reportingThreshold` contains all the methods required to deal with reporting thresholds and only contains the `controller` for it's data. Like most contracts, `reportingThreshold` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 
 ### reportingThreshold methods:
 *This is a new contract, as such all methods are new methods.*
 
 ```
-calculateReportingThreshold(branch, event, period, sender):
++ calculateReportingThreshold(branch, event, period, sender):
 ```
 `calculateReportingThreshold` is used to determine the reporting threshold for a specified `event` and `sender` in a specific `branch` and `period`. This function returns the calculated reporting threshold, which is used to determine if a reporter should report on a specific `event` or not.
 
 ```
-getEventsToReportOn(branch, period, sender, start, end):
++ getEventsToReportOn(branch, period, sender, start, end):
 ```
 `getEventsToReportOn` is used to get a list of events for a reporter to report on given an index range for the pool of events to select from. This method determines what reports a specific `sender` should report on in a given `branch` and `period`. This takes a `start` and `end` index to limit the potential events that might be selected for a reporter. Any event where the `sender`'s SHA3 hash of their `address` + the `eventID` normalized to 1 is below the report threshold for the specific event will be added to the list of events to report on for the `sender`.
 
 ```
-getEventCanReportOn(branch, period, reporter, event):
++ getEventCouldveReportedOn(branch, period, reporter, event):
 ```
-`getEventCanReportOn` is used to determine if a `reporter` is eligible to report on a specific `event` in a given `branch` and `period`. returns `1` if they can, `0` if they cannot.
+`getEventCouldveReportedOn` is used to determine if a `reporter` was able to report on a specific `event` in a given `branch` and `period`. returns `1` if able, `0` if the `reporter` is not able.
 
 ```
 setReportingThreshold(event):
 ```
 `setReportingThreshold` is used to change to change the threshold of a given `event` to the maximum threshold. In the rare possibility that less than 3 reporters get randomly selected to report on a market in a given period, on the last day, we can change the SHA3 threshold using this function. This would be called from the UI.
+
+```
++ calculateReportTargetForEvent(branch, event, votePeriod, sender):
+```
+`calculateReportTargetForEvent` is used to determine the minimum number of reports required to resolve an `event` on a specific `branch` and `votePeriod`. If this hasn't been calculated previously then the `sender` will receive the subsidy for the `event` as a reward for calculating the minimum number of reports required. This function returns the minimum amount of reports required to resolve a specific `event`.
 
 ```
 calculateNumberOfEventsAReporterHasToReportOnAtMinimum(branch, reporter, period):
@@ -1073,8 +1134,12 @@ data orders[<order>](
   sharesEscrowed,
   moneyEscrowed
 )
+
+data controller
 ```
 `trades.se` has become `orders.se` and gone through some changes in the new contracts. `tradeCommits` has been changed to `orderCommits`. It's still indexed by a trader address and contains the transaction hash `hash` and block number `block` for each order committed. `trades` has become `orders` which is indexed by an `order` ID. The two new values added to `orders` are `sharesEscrowed` and `moneyEscrowed` which represent the amount of shares or money held to be used to fulfill bids and asks.
+
+Finally like most contracts, `orders` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ### orders method changes, additions, and removals:
 ```
@@ -1149,7 +1214,11 @@ Changed `fillOrder(orderID, fill, money, shares):` was renamed to `fillOrder`. r
 
 ## src/data_api/topics.se
 
-`Topics` actually hasn't changed at all between the current version of master and develop, I just included it here to make it clear I didn't forget to inspect `topics`, but that it just hasn't changed.
+### Data Structure of topics Contract:
+```
+data controller
+```
+The only change to `topics` is the addition of the `controller`. Like most contracts, `topics` has a `controller` which is set to the `controller.se` contract address. The `controller` contract is used to modify existing contracts in Augur based on proposed changes and a vote by `REP` holders and also manages the whitelist for Augur.
 
 ## src/functions/bidAndAsk.se
 
